@@ -8,4 +8,4 @@ cairo-rs = "*"
 dft = "0.4.3"
 gdk = "*"
 gtk = "*"
-pulse-simple = {path = "../rust-pulse-simple"}
+pulse-simple = {git = "https://github.com/efyang/rust-pulse-simple"}
