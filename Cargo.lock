@@ -3,8 +3,10 @@ name = "visualizers"
 version = "0.1.0"
 dependencies = [
  "cairo-rs 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "dft 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "gdk 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "gtk 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pulse-simple 0.0.0",
 ]
 
 [[package]]
@@ -52,6 +54,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "pkg-config 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "dft"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "num-complex 0.1.33 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -212,6 +222,27 @@ version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "libpulse-sys"
+version = "0.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "num-complex"
+version = "0.1.33"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "num-traits 0.1.33 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.1.33"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "pango"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -237,4 +268,12 @@ dependencies = [
 name = "pkg-config"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "pulse-simple"
+version = "0.0.0"
+dependencies = [
+ "libc 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libpulse-sys 0.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
