@@ -6,13 +6,15 @@ use gdk::WindowTypeHint;
 use std::thread::sleep;
 use std::time::Duration;
 
+use data_helpers::average_shrink;
+
 // temporary move - restructure later
 pub fn run() {
     if gtk::init().is_err() {
         println!("Failed to initialize GTK.");
         return;
     }
-    
+
     transparent_window(WindowPosition::Mouse);
 
     let statusicon = gtk::StatusIcon::new_from_file("icon.png");
@@ -37,7 +39,7 @@ fn transparent_window(pos: WindowPosition) {
             window.set_visual(Some(&alpha_screen));
         }
     }
-   
+
     // initialize window drawing
     window.connect_draw(|_, context| {
         context.set_source_rgba(0., 0., 0., 0.5);

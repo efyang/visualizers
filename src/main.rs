@@ -6,6 +6,7 @@ extern crate pulse_simple;
 
 mod audio_process;
 mod visualize;
+mod data_helpers;
 
 use visualize::run;
 
