@@ -11,10 +11,11 @@ extern crate pa_simple;
 mod audio_process;
 mod audio_devices;
 mod data_helpers;
-mod visualize;
 mod drawing;
+mod messages;
+mod visualize;
 
-use visualize::run;
+use visualize::GtkVisualizerApp;
 
 fn main() {
     // run();

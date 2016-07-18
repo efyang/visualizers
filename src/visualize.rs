@@ -1,33 +1,75 @@
-use gtk;
+use std::sync::mpsc::{channel, Sender, Receiver};
+
 use cairo::Operator;
+use gtk;
 use gtk::prelude::*;
 use gtk::{DrawingArea, Window, WindowType, WindowPosition, StatusIcon};
 use gdk::WindowTypeHint;
 
 use audio_devices::{get_devices, PaSourceInfo};
+use audio_process::AudioProcessor;
 use drawing::*;
 
-pub struct VisualizerApp {
-    // id needed for configs and title
-    current_id_n: usize,
-    instances: Vec<VisualizerInstance>,
-    default_source_name: String,
-    sources: Vec<Option<PaSourceInfo>>,
-    // multiple renderers per processor - have list of processors and map them
-    //audio_processors: Vec<>
-    icon: StatusIcon,
+// NOTE: include the icon as bytes in the program
+
+pub enum UpdateMessage {
+    // id
+    Destroy(usize),
+    // id, new index
+    ChangeMapping(usize, usize),
 }
 
-impl VisualizerApp {
-    // Only call this once
-    fn initialize() -> VisualizerApp {
-        VisualizerApp::initialize_with_instances(Vec::new())
-    }
+pub type DataMessage = Vec<f32>;
 
-    fn initialize_with_instances(instances: Vec<VisualizerInstance>) -> VisualizerApp {
-        // gtk::init
-        // make a test window to test whether composited or find some other way
-        unimplemented!()
+pub struct GtkVisualizerApp {
+    // id needed for configs and title
+    // when assigning: give current, then increment
+    current_id_n: usize,
+    instances: Vec<GtkVisualizerInstance>,
+    default_source_name: String,
+    sources: Vec<Option<PaSourceInfo>>,
+    // multiple renderers per audio processor - have list of processors and map them to avoid
+    // overuse of audio resources and conflicts
+    // array w/ size of max index + 1
+    // vec<usize> are the ids
+    audio_processor_mappings: Vec<Option<(AudioProcessor, Vec<usize>)>>,
+    icon: StatusIcon,
+    // receiver for deletion messages
+    msg_receiver: Receiver<UpdateMessage>,
+    data_senders: Vec<Sender<DataMessage>>,
+}
+
+impl GtkVisualizerApp {
+    // Only call this once
+    fn initialize() -> GtkVisualizerApp {
+        gtk::init().expect("Failed to initialize GTK");
+        // make a test window to test whether composited
+        assert!(gtk_is_composited(), "Gtk is not composited");
+        let (default_source, devices) = get_devices().expect("Could not get any audio devices");
+        let mut instances = Vec::<GtkVisualizerInstance>::new();
+        let mut audio_processor_mappings = Vec::new();
+        // read from configs here
+        // ...
+        // ...
+        let mut data_senders = Vec::new();
+        let (update_send, update_recv) = channel();
+        for mut instance in instances.iter_mut() {
+            let (data_send, data_recv) = channel();
+            data_senders.push(data_send);
+            instance.set_sender(update_send.clone());
+            instance.set_receiver(data_recv);
+        }
+
+        GtkVisualizerApp {
+            current_id_n: instances.len(),
+            instances: instances,
+            default_source_name: default_source,
+            sources: devices,
+            audio_processor_mappings: audio_processor_mappings,
+            icon: StatusIcon::new_from_file("icon.png"),
+            msg_receiver: update_recv,
+            data_senders: data_senders,
+        }
     }
 
     // Update source information
@@ -39,40 +81,52 @@ impl VisualizerApp {
     }
 }
 
-pub struct VisualizerInstance {
+// must be run only after gtk is initialized
+fn gtk_is_composited() -> bool {
+    assert!(gtk::is_initialized());
+    let test_window = Window::new(WindowType::Toplevel);
+    let screen = WindowExt::get_screen(&test_window).unwrap();
+    screen.is_composited()
+}
+
+// how the hell do you update the drawing style when its getting used by 2 separate closures?
+// ^ have connect_draw have a Receiver<DrawingStyle> and connect_clicked Sender<DrawingStyle>
+pub struct GtkVisualizerInstance {
     window: Window,
     x_pos: usize,
     y_pos: usize,
     style: DrawingStyle,
+    // both should always be Some after main app is initialized
+    msg_sender: Option<Sender<UpdateMessage>>,
+    data_receiver: Option<Receiver<DataMessage>>,
 }
 
-impl VisualizerInstance {
+impl GtkVisualizerInstance {
     fn new(id: usize, x: usize, y: usize) -> Self {
         let style = DrawingStyle::default();
         let window = Window::new(WindowType::Toplevel);
         // IMPLEMENT REST
-        VisualizerInstance {
+        GtkVisualizerInstance {
             window: window,
             x_pos: x,
             y_pos: y,
             style: style,
+            msg_sender: None,
+            data_receiver: None,
         }
+        ;unimplemented!()
+    }
+
+    fn set_sender(&mut self, sender: Sender<UpdateMessage>) {
+        self.msg_sender = Some(sender);
+    }
+
+    fn set_receiver(&mut self, receiver: Receiver<DataMessage>) {
+        self.data_receiver = Some(receiver);
     }
 }
 
-// temporary move - restructure later
-pub fn run() {
-    if gtk::init().is_err() {
-        println!("Failed to initialize GTK.");
-        return;
-    }
-
-    transparent_window(WindowPosition::Mouse);
-
-    let statusicon = StatusIcon::new_from_file("icon.png");
-    gtk::main();
-}
-
+// restructure later
 fn transparent_window(pos: WindowPosition) {
     let window = Window::new(WindowType::Toplevel);
     window.set_title("Test Program");
@@ -93,7 +147,8 @@ fn transparent_window(pos: WindowPosition) {
     } else {
         panic!("Cannot use non-composited screen");
     }
-
+    // make the visualizer instance in here
+    // clone the sender to use for connect_destroy, move rest to connect_draw
     // initialize window drawing
     window.connect_draw(|_, context| {
         context.set_source_rgba(0., 0., 0., 0.5);

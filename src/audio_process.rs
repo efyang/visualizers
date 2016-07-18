@@ -5,11 +5,6 @@ use pa_simple::{Builder, Reader};
 
 const FRAMES: usize = 256;
 
-// also initialize global mutexed id counter and dft plan
-fn get_dft_plan(channels: usize) -> Plan {
-    Plan::new(Operation::Forward, channels * FRAMES)
-}
-
 pub struct AudioProcessor {
     source_index: usize,
     channels: usize,
@@ -29,7 +24,7 @@ impl AudioProcessor {
                     source_index: source_index,
                     channels: source.channels as usize,
                     rate: source.rate,
-                    dft_plan: get_dft_plan(source.channels as usize),
+                    dft_plan: Plan::new(Operation::Forward, source.channels as usize * FRAMES),
                     recorder: Builder::new("Test", "Record")
                         .channels(source.channels)
                         .rate(source.rate)

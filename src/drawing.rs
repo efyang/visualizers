@@ -38,7 +38,7 @@ impl Default for CircleData {
     fn default() -> Self {
         CircleData {
             min_radius: 10,
-            max_radius:50,
+            max_radius: 50,
             draw_color: Color::black(),
             bg_color: Color::default_bg(),
             top_padding: 10,
@@ -99,11 +99,18 @@ impl GetDrawArea for DrawingStyle {
 
 impl GetDrawArea for BarData {
     fn draw_area(&self) -> (usize, usize) {
+        let vert_mult;
+        if self.double_sided {
+            vert_mult = 2;
+        } else {
+            vert_mult = 1;
+        }
         (self.bar_piece_width * self.num_bars +
          self.bar_piece_horizontal_spacing * (self.num_bars - 1) + self.right_padding +
          self.left_padding,
-         self.max_bar_pieces_vertical * self.bar_piece_height +
-         self.bar_piece_vertical_spacing * (self.max_bar_pieces_vertical - 1) +
+         vert_mult *
+         (self.max_bar_pieces_vertical * self.bar_piece_height +
+          self.bar_piece_vertical_spacing * (self.max_bar_pieces_vertical - 1)) +
          self.top_padding + self.bottom_padding)
     }
 }
