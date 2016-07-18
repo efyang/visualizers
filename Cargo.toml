@@ -11,4 +11,4 @@ gtk = "*"
 lazy_static = "0.2.1"
 libc = "0.2.14"
 libpulse-sys = "0.0.0"
-pa_simple = {path = "/home/efyang/gitproj/pa-simple-rs"}
+pa_simple = {git = "https://github.com/efyang/pa-simple-rs"}
