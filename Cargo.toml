@@ -11,6 +11,4 @@ gtk = "*"
 lazy_static = "0.2.1"
 libc = "0.2.14"
 libpulse-sys = "0.0.0"
-
-[dependencies.pulse-simple]
-git = "https://github.com/efyang/rust-pulse-simple"
+pa_simple = {path = "/home/efyang/gitproj/pa-simple-rs"}

@@ -1,12 +1,64 @@
 use gtk;
 use cairo::Operator;
 use gtk::prelude::*;
-use gtk::{DrawingArea, Window, WindowType, WindowPosition};
+use gtk::{DrawingArea, Window, WindowType, WindowPosition, StatusIcon};
 use gdk::WindowTypeHint;
-use std::thread::sleep;
-use std::time::Duration;
 
-use data_helpers::average_shrink;
+use audio_devices::{get_devices, PaSourceInfo};
+use drawing::*;
+
+pub struct VisualizerApp {
+    // id needed for configs and title
+    current_id_n: usize,
+    instances: Vec<VisualizerInstance>,
+    default_source_name: String,
+    sources: Vec<Option<PaSourceInfo>>,
+    // multiple renderers per processor - have list of processors and map them
+    //audio_processors: Vec<>
+    icon: StatusIcon,
+}
+
+impl VisualizerApp {
+    // Only call this once
+    fn initialize() -> VisualizerApp {
+        VisualizerApp::initialize_with_instances(Vec::new())
+    }
+
+    fn initialize_with_instances(instances: Vec<VisualizerInstance>) -> VisualizerApp {
+        // gtk::init
+        // make a test window to test whether composited or find some other way
+        unimplemented!()
+    }
+
+    // Update source information
+    fn update_sources(&mut self) -> Result<(), String> {
+        let source_info = try!(get_devices());
+        self.default_source_name = source_info.0;
+        self.sources = source_info.1;
+        Ok(())
+    }
+}
+
+pub struct VisualizerInstance {
+    window: Window,
+    x_pos: usize,
+    y_pos: usize,
+    style: DrawingStyle,
+}
+
+impl VisualizerInstance {
+    fn new(id: usize, x: usize, y: usize) -> Self {
+        let style = DrawingStyle::default();
+        let window = Window::new(WindowType::Toplevel);
+        // IMPLEMENT REST
+        VisualizerInstance {
+            window: window,
+            x_pos: x,
+            y_pos: y,
+            style: style,
+        }
+    }
+}
 
 // temporary move - restructure later
 pub fn run() {
@@ -17,7 +69,7 @@ pub fn run() {
 
     transparent_window(WindowPosition::Mouse);
 
-    let statusicon = gtk::StatusIcon::new_from_file("icon.png");
+    let statusicon = StatusIcon::new_from_file("icon.png");
     gtk::main();
 }
 
@@ -38,6 +90,8 @@ fn transparent_window(pos: WindowPosition) {
         if let Some(alpha_screen) = screen.get_rgba_visual() {
             window.set_visual(Some(&alpha_screen));
         }
+    } else {
+        panic!("Cannot use non-composited screen");
     }
 
     // initialize window drawing

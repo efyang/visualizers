@@ -9,7 +9,7 @@ dependencies = [
  "lazy_static 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "libpulse-sys 0.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "pulse-simple 0.0.0 (git+https://github.com/efyang/rust-pulse-simple)",
+ "pa_simple 0.1.0",
 ]
 
 [[package]]
@@ -251,6 +251,14 @@ version = "0.1.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "pa_simple"
+version = "0.1.0"
+dependencies = [
+ "libc 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libpulse-sys 0.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "pango"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -276,13 +284,4 @@ dependencies = [
 name = "pkg-config"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "pulse-simple"
-version = "0.0.0"
-source = "git+https://github.com/efyang/rust-pulse-simple#6bad29da201d624843041aa23d8a28e6bb765ca6"
-dependencies = [
- "libc 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
- "libpulse-sys 0.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 

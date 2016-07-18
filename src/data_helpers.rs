@@ -4,7 +4,7 @@
 // after shrink to 4
 // [1, 4, 7, 9.5]
 // use to make dft'd data viewable in n bars
-pub fn average_shrink(items: &mut Vec<f64>, n: usize) {
+pub fn shrink_by_averaging(items: &mut Vec<f64>, n: usize) {
     assert!(n != 0);
 
     fn average(items: &[f64]) -> f64 {
@@ -29,29 +29,29 @@ pub fn average_shrink(items: &mut Vec<f64>, n: usize) {
 }
 
 #[test]
-fn test_average_shrink_1() {
+fn test_shrink_by_averaging_1() {
     let mut data = vec![0., 1., 2., 3., 4., 5., 6., 7., 8.];
-    average_shrink(&mut data, 3);
+    shrink_by_averaging(&mut data, 3);
     assert_eq!(data.as_slice(), &[1., 4., 7.]);
 }
 
 #[test]
-fn test_average_shrink_2() {
+fn test_shrink_by_averaging_2() {
     let mut data = vec![0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.];
-    average_shrink(&mut data, 3);
+    shrink_by_averaging(&mut data, 3);
     assert_eq!(data.as_slice(), &[1.5, 5.5, 9.]);
 }
 
 #[test]
-fn test_average_shrink_3() {
+fn test_shrink_by_averaging_3() {
     let mut data = vec![0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.];
-    average_shrink(&mut data, 2);
-    assert_eq!(data.as_slice(), &[2.5, 8.]);   
+    shrink_by_averaging(&mut data, 2);
+    assert_eq!(data.as_slice(), &[2.5, 8.]);
 }
 
 #[test]
-fn test_average_shrink_4() {
+fn test_shrink_by_averaging_4() {
     let mut data = vec![0., 1., 2., 3., 4., 5., 6., 7.];
-    average_shrink(&mut data, 2);
-    assert_eq!(data.as_slice(), &[1.5, 5.5]);   
+    shrink_by_averaging(&mut data, 2);
+    assert_eq!(data.as_slice(), &[1.5, 5.5]);
 }
