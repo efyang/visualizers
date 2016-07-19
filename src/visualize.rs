@@ -9,6 +9,7 @@ use gdk::WindowTypeHint;
 
 use audio_devices::{get_devices, PaSourceInfo};
 use audio_process::AudioProcessor;
+use config::{ConvertTo, GtkVisualizerConfig};
 use drawing::*;
 use messages::HandleMessage;
 
@@ -94,6 +95,17 @@ impl GtkVisualizerApp {
         Ok(())
     }
 
+    fn default_source_index(&mut self) -> Option<usize> {
+        for i in 0..self.sources.len() {
+            if let Some(ref source_info) = self.sources[i] {
+                if source_info.name == self.default_source_name {
+                    return Some(i);
+                }
+            }
+        }
+        None
+    }
+
     pub fn remove_id_from_index(&mut self, id: usize, index: usize) {
         let mut rm = false;
         if let Some((_, ref mut ids)) = self.audio_processor_mappings[index] {
@@ -157,11 +169,17 @@ impl GtkVisualizerApp {
     }
 }
 
+impl ConvertTo<Vec<GtkVisualizerConfig>> for GtkVisualizerApp {
+    fn convert_to(&self) -> Vec<GtkVisualizerConfig> {
+        self.instances.values().map(|v| v.convert_to()).collect()
+    }
+}
 
 // how the hell do you update the drawing style when its getting used by 2 separate closures?
 // ^ have connect_draw have a Receiver<DrawingStyle> and connect_clicked Sender<DrawingStyle>
 pub struct GtkVisualizerInstance {
     id: usize,
+    index: usize,
     window: Window,
     x_pos: usize,
     y_pos: usize,
@@ -172,13 +190,14 @@ pub struct GtkVisualizerInstance {
 }
 
 impl GtkVisualizerInstance {
-    fn new(id: usize, x: usize, y: usize) -> Self {
+    fn new(id: usize, x: usize, y: usize, index: usize) -> Self {
         let style = DrawingStyle::default();
         let window = Window::new(WindowType::Toplevel);
         let (draw_send, draw_recv) = channel::<DrawingStyle>();
         // IMPLEMENT REST
         GtkVisualizerInstance {
             id: id,
+            index: index,
             window: window,
             x_pos: x,
             y_pos: y,
@@ -211,6 +230,17 @@ impl GtkVisualizerInstance {
 
     fn iterate(&mut self) {
         unimplemented!()
+    }
+}
+
+impl ConvertTo<GtkVisualizerConfig> for GtkVisualizerInstance {
+    fn convert_to(&self) -> GtkVisualizerConfig {
+        GtkVisualizerConfig {
+            index: self.index,
+            style: self.style.clone(),
+            x_pos: self.x_pos,
+            y_pos: self.y_pos,
+        }
     }
 }
 

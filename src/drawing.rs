@@ -49,11 +49,13 @@ impl Default for CircleData {
     }
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub enum DrawingStyle {
     Bars(BarData),
     Circle(CircleData),
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct BarData {
     pub double_sided: bool,
     pub num_bars: usize,
@@ -72,6 +74,7 @@ pub struct BarData {
     pub right_padding: usize,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CircleData {
     pub min_radius: usize,
     pub max_radius: usize,
@@ -123,6 +126,7 @@ impl GetDrawArea for CircleData {
     }
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Color(f64, f64, f64, f64);
 
 impl Color {
