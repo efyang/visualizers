@@ -4,6 +4,7 @@ name = "visualizers"
 version = "0.1.0"
 
 [dependencies]
+app_dirs = "0.0.2"
 cairo-rs = "*"
 dft = "0.4.3"
 gdk = "*"
@@ -11,4 +12,9 @@ gtk = "*"
 lazy_static = "0.2.1"
 libc = "0.2.14"
 libpulse-sys = "0.0.0"
-pa_simple = {git = "https://github.com/efyang/pa-simple-rs"}
+serde = "*"
+serde_macros = "*"
+serde_yaml = "0.3.0"
+
+[dependencies.pa_simple]
+git = "https://github.com/efyang/pa-simple-rs"

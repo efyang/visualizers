@@ -64,17 +64,4 @@ impl AudioProcessor {
 
         out_data
     }
-
-    // NOTE: maybe instead of audio source index just switch by name and display description to
-    // user?
-
-    // switch the audio source index
-    pub fn switch_to_by_index(&mut self, new_index: usize) -> Result<(), String> {
-        unimplemented!()
-    }
-
-    // switch the audio source by name
-    fn switch_source_by_name(&mut self, name: &str) -> Result<(), String> {
-        unimplemented!()
-    }
 }
