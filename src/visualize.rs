@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::{Arc, Mutex};
 
 use cairo::Operator;
 use gtk;
@@ -8,10 +9,9 @@ use gtk::{DrawingArea, Window, WindowType, WindowPosition, StatusIcon};
 use gdk::WindowTypeHint;
 
 use audio_devices::{get_devices, PaSourceInfo};
-use audio_process::AudioProcessor;
+use audio_process::{AudioProcessor, FRAMES};
 use config::{ConvertTo, GtkVisualizerConfig};
 use drawing::*;
-use messages::HandleMessage;
 
 // NOTE: include the icon as bytes in the program
 
@@ -22,7 +22,7 @@ pub enum UpdateMessage {
     ChangeMapping(usize, usize, usize),
 }
 
-pub type DataMessage = Vec<Vec<f64>>;
+pub type AudioFrame = Vec<Vec<f64>>;
 
 pub struct GtkVisualizerApp {
     // id needed for configs and title
@@ -39,7 +39,7 @@ pub struct GtkVisualizerApp {
     icon: StatusIcon,
     // receiver for deletion messages
     msg_receiver: Receiver<UpdateMessage>,
-    pub data_senders: HashMap<usize, Sender<DataMessage>>,
+    pub current_data: HashMap<usize, Arc<Mutex<AudioFrame>>>,
 }
 
 impl GtkVisualizerApp {
@@ -59,15 +59,13 @@ impl GtkVisualizerApp {
         // read from configs here
         // ...
         // ...
-        // let mut data_senders = Vec::new();
-        let mut data_senders = HashMap::<usize, Sender<DataMessage>>::new();
+        let mut current_data = HashMap::<usize, Arc<Mutex<AudioFrame>>>::new();
         let (update_send, update_recv) = channel();
         for (id, mut instance) in instances.iter_mut() {
-            let (data_send, data_recv) = channel();
-            // data_senders.push(data_send);
-            data_senders.insert(*id, data_send);
+            let data_source = current_data.entry(instance.index())
+                .or_insert(Arc::new(Mutex::new(vec![vec![0f64; FRAMES]])));
             instance.set_sender(update_send.clone());
-            instance.set_receiver(data_recv);
+            instance.set_data_source(data_source.clone());
             instance.show_all();
         }
         // initialize and set icon callbacks
@@ -82,7 +80,7 @@ impl GtkVisualizerApp {
             audio_processor_mappings: audio_processor_mappings,
             icon: StatusIcon::new_from_file("icon.png"),
             msg_receiver: update_recv,
-            data_senders: data_senders,
+            current_data: current_data,
         };
         unimplemented!()
     }
@@ -121,6 +119,7 @@ impl GtkVisualizerApp {
         // remove audio processor if no more instances are using it
         if rm {
             self.audio_processor_mappings[index] = None;
+            self.current_data.remove(&index);
         }
     }
 
@@ -132,11 +131,33 @@ impl GtkVisualizerApp {
         // if the processor doesn't exist, create it
         match AudioProcessor::new(self.sources.as_slice(), index) {
             Some(processor) => {
+                self.current_data
+                    .insert(index,
+                            Arc::new(Mutex::new(vec![vec![0f64; FRAMES]; processor.channels()])));
                 self.audio_processor_mappings[index] = Some((processor, vec![id]));
                 Ok(())
             }
             None => Err(format!("Could not set id {} to index {}", id, index)),
         }
+    }
+
+    fn handle_message(&mut self, message: UpdateMessage) -> Result<(), String> {
+        match message {
+            UpdateMessage::Destroy(id, index) => {
+                self.instances.remove(&id);
+                self.remove_id_from_index(id, index);
+            }
+            UpdateMessage::ChangeMapping(id, old_idx, new_idx) => {
+                try!(self.assign_id_to_index(id, new_idx));
+                self.remove_id_from_index(id, old_idx);
+                // set it to the new data source
+                self.instances
+                    .get_mut(&id)
+                    .unwrap()
+                    .set_data_source(self.current_data[&new_idx].clone());
+            }
+        }
+        Ok(())
     }
 
     pub fn main_iteration(&mut self) -> Result<(), String> {
@@ -146,15 +167,11 @@ impl GtkVisualizerApp {
             Err(e) => return Err(format!("{}", e)),
         }
 
-        // send data from audio processors
+        // set data from audio processors
         for mapping in self.audio_processor_mappings.iter_mut() {
             if let Some((ref mut processor, ref ids)) = *mapping {
                 let data = processor.get_data_frame();
-                for id in ids {
-                    if let Err(e) = self.data_senders[id].send(data.clone()) {
-                        return Err(format!("{}", e));
-                    }
-                }
+                *self.current_data[&processor.source_index()].lock().unwrap() = data;
             }
         }
 
@@ -177,6 +194,7 @@ impl ConvertTo<Vec<GtkVisualizerConfig>> for GtkVisualizerApp {
 
 // how the hell do you update the drawing style when its getting used by 2 separate closures?
 // ^ have connect_draw have a Receiver<DrawingStyle> and connect_clicked Sender<DrawingStyle>
+// probably going to need a channel to update the data source when its changed
 pub struct GtkVisualizerInstance {
     id: usize,
     index: usize,
@@ -186,7 +204,7 @@ pub struct GtkVisualizerInstance {
     style: DrawingStyle,
     // both should always be Some after main app is initialized
     msg_sender: Option<Sender<UpdateMessage>>,
-    data_receiver: Option<Receiver<DataMessage>>,
+    data_source: Option<Arc<Mutex<AudioFrame>>>,
 }
 
 impl GtkVisualizerInstance {
@@ -203,13 +221,17 @@ impl GtkVisualizerInstance {
             y_pos: y,
             style: style,
             msg_sender: None,
-            data_receiver: None,
+            data_source: None,
         };
         unimplemented!();
     }
 
     fn id(&self) -> usize {
         self.id
+    }
+
+    fn index(&self) -> usize {
+        self.index
     }
 
     fn set_id(&mut self, id: usize) {
@@ -220,8 +242,8 @@ impl GtkVisualizerInstance {
         self.msg_sender = Some(sender);
     }
 
-    fn set_receiver(&mut self, receiver: Receiver<DataMessage>) {
-        self.data_receiver = Some(receiver);
+    fn set_data_source(&mut self, data_source: Arc<Mutex<AudioFrame>>) {
+        self.data_source = Some(data_source.clone());
     }
 
     fn show_all(&self) {

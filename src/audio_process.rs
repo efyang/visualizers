@@ -3,7 +3,7 @@ use dft;
 use dft::{Operation, Plan};
 use pa_simple::{Builder, Reader};
 
-const FRAMES: usize = 256;
+pub const FRAMES: usize = 256;
 
 pub struct AudioProcessor {
     source_index: usize,
@@ -64,4 +64,8 @@ impl AudioProcessor {
 
         out_data
     }
+
+    pub fn channels(&self) -> usize {self.channels}
+
+    pub fn source_index(&self) -> usize {self.source_index}
 }

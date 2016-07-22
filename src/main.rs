@@ -18,7 +18,6 @@ mod audio_devices;
 mod config;
 mod data_helpers;
 mod drawing;
-mod messages;
 mod visualize;
 
 use visualize::GtkVisualizerApp;
