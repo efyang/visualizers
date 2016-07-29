@@ -14,6 +14,7 @@ use config::{ConvertTo, GtkVisualizerConfig};
 use drawing::*;
 
 // NOTE: include the icon as bytes in the program
+// NOTE: lazy_static init the current data hashmap
 
 pub enum UpdateMessage {
     // id, index

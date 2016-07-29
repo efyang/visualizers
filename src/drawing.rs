@@ -37,6 +37,7 @@ impl Default for BarData {
 impl Default for CircleData {
     fn default() -> Self {
         CircleData {
+            split_audio_channels: false,
             min_radius: 10,
             max_radius: 50,
             draw_color: Color::black(),
@@ -49,10 +50,28 @@ impl Default for CircleData {
     }
 }
 
+impl Default for KuwoGradientData {
+    fn default() -> Self {
+        KuwoGradientData {
+            split_audio_channels: true,
+            height: 50,
+            width: 300,
+            bg_color: Color::default_bg(),
+            gradient_start: Color::blue(),
+            gradient_end: Color::yellow(),
+            top_padding: 10,
+            bottom_padding: 10,
+            left_padding: 10,
+            right_padding: 10,
+        }
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub enum DrawingStyle {
     Bars(BarData),
     Circle(CircleData),
+    KuwoGradient(KuwoGradientData),
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -76,10 +95,25 @@ pub struct BarData {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CircleData {
+    pub split_audio_channels: bool,
     pub min_radius: usize,
     pub max_radius: usize,
     pub draw_color: Color,
     pub bg_color: Color,
+    pub top_padding: usize,
+    pub bottom_padding: usize,
+    pub left_padding: usize,
+    pub right_padding: usize,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct KuwoGradientData {
+    pub split_audio_channels: bool,
+    pub height: usize,
+    pub width: usize,
+    pub bg_color: Color,
+    pub gradient_start: Color,
+    pub gradient_end: Color,
     pub top_padding: usize,
     pub bottom_padding: usize,
     pub left_padding: usize,
@@ -96,6 +130,7 @@ impl GetDrawArea for DrawingStyle {
         match *self {
             DrawingStyle::Bars(ref bdata) => bdata.draw_area(),
             DrawingStyle::Circle(ref cdata) => cdata.draw_area(),
+            DrawingStyle::KuwoGradient(ref kgdata) => kgdata.draw_area(),
         }
     }
 }
@@ -126,6 +161,13 @@ impl GetDrawArea for CircleData {
     }
 }
 
+impl GetDrawArea for KuwoGradientData {
+    fn draw_area(&self) -> (usize, usize) {
+        (self.width + self.left_padding + self.right_padding,
+         self.height + self.top_padding + self.bottom_padding)
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Color(f64, f64, f64, f64);
 
@@ -140,5 +182,23 @@ impl Color {
 
     fn transparent() -> Self {
         Color(0., 0., 0., 0.)
+    }
+
+    // for gradient defaults
+    // left side
+    fn blue() -> Self {
+        Color(0., 0., 1., 1.)
+    }
+    // right side
+    fn yellow() -> Self {
+        Color(1., 1., 0., 1.)
+    }
+}
+
+macro_rules! call_rgba_fn {
+    ($func:ident, $color:expr) => {
+        if let (r,g,b,a) = $color {
+            $func(r,g,b,a);
+        }
     }
 }
