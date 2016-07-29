@@ -5,9 +5,8 @@ use std::io;
 use serde_yaml::{from_reader, to_writer};
 use app_dirs::{get_app_dir, AppDirType};
 use drawing::DrawingStyle;
-use visualize::GtkVisualizerInstance;
 
-const CONFIG_NAME: &'static str = "visualizers.conf";
+const CONFIG_NAME: &'static str = "visualizers.yml";
 const CONFIG_DIR: &'static str = "visualizers";
 
 lazy_static! {

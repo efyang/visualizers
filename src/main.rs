@@ -10,17 +10,18 @@ extern crate gdk;
 extern crate lazy_static;
 extern crate libc;
 extern crate libpulse_sys;
-extern crate serde_yaml;
 extern crate pa_simple;
+extern crate serde_yaml;
 
+mod app;
 mod audio_process;
 mod audio_devices;
 mod config;
 mod data_helpers;
 mod drawing;
-mod visualize;
+mod instance;
 
-use visualize::GtkVisualizerApp;
+use app::GtkVisualizerApp;
 
 fn main() {
     // run();

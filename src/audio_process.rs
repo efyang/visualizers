@@ -1,4 +1,4 @@
-use audio_devices::{get_devices, PaSourceInfo};
+use audio_devices::PaSourceInfo;
 use dft;
 use dft::{Operation, Plan};
 use pa_simple::{Builder, Reader};
