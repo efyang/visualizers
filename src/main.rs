@@ -6,6 +6,7 @@ extern crate cairo;
 extern crate dft;
 extern crate gtk;
 extern crate gdk;
+extern crate gdk_sys;
 #[macro_use]
 extern crate lazy_static;
 extern crate libc;
