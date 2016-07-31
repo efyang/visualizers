@@ -18,11 +18,10 @@ impl Draw for GradientData {
         let half_height = (self.height - self.middle_line_height) / 2.;
 
         for mut datavec in data.iter_mut() {
-            scale(datavec); // replace this with a more absolute scale later on
+            // scale(datavec); // replace this with a more absolute scale later on
             if self.width_desensitivity != 0 {
                 shrink_by_averaging(&mut datavec,
-                                    256 /
-                                    (2usize.pow(self.width_desensitivity as u32)));
+                                    256 / (2usize.pow(self.width_desensitivity as u32)));
                 // replace 256 with FRAMES
             }
             datavec.pop();
@@ -62,45 +61,34 @@ impl Draw for GradientData {
                 context.move_to(0., combined[0]);
                 for (idx, chunk) in p1.chunks(4)
                     .enumerate()
-                        .map(|(idx, c)| (idx * 4 + 1, c)) {
-                            let (x1, y1) = ((idx + 1) as f64 * scale_x,
-                            (self.height / 2.) - chunk[1]);
-                            let (x2, y2) = ((idx + 2) as f64 * scale_x,
-                            (self.height / 2.) - chunk[2]);
-                            let (x3, y3) = ((idx + 3) as f64 * scale_x,
-                            (self.height / 2.) - chunk[3]);
-                            context.curve_to(x1,
-                                             y1,
-                                             x2,
-                                             y2,
-                                             f64::min(self.width / 2., x3),
-                                             f64::min(y3, half_height));
-                        }
+                    .map(|(idx, c)| (idx * 4 + 1, c)) {
+                    let (x1, y1) = ((idx + 1) as f64 * scale_x, (self.height / 2.) - chunk[1]);
+                    let (x2, y2) = ((idx + 2) as f64 * scale_x, (self.height / 2.) - chunk[2]);
+                    let (x3, y3) = ((idx + 3) as f64 * scale_x, (self.height / 2.) - chunk[3]);
+                    context.curve_to(x1,
+                                     y1,
+                                     x2,
+                                     y2,
+                                     f64::min(self.width / 2., x3),
+                                     f64::min(y3, half_height));
+                }
                 for (idx, chunk) in p2.chunks(4)
                     .enumerate()
-                        .map(|(idx, c)| (idx * 4 + 1 + combined.len() / 2, c)) {
-                            let (x1, y1) = ((idx + 1) as f64 * scale_x,
-                            (self.height / 2.) - chunk[1]);
-                            let (x2, y2) = ((idx + 2) as f64 * scale_x,
-                            (self.height / 2.) - chunk[2]);
-                            let (x3, y3) = ((idx + 3) as f64 * scale_x,
-                            (self.height / 2.) - chunk[3]);
-                            if idx == combined.len() - 3 {
-                                context.curve_to(x1,
-                                                 y1,
-                                                 x2,
-                                                 y2,
-                                                 f64::min(self.width, x3),
-                                                 half_height);
-                            } else {
-                                context.curve_to(x1,
-                                                 y1,
-                                                 x2,
-                                                 y2,
-                                                 f64::min(self.width, x3),
-                                                 f64::min(y3, half_height));
-                            }
-                        }
+                    .map(|(idx, c)| (idx * 4 + 1 + combined.len() / 2, c)) {
+                    let (x1, y1) = ((idx + 1) as f64 * scale_x, (self.height / 2.) - chunk[1]);
+                    let (x2, y2) = ((idx + 2) as f64 * scale_x, (self.height / 2.) - chunk[2]);
+                    let (x3, y3) = ((idx + 3) as f64 * scale_x, (self.height / 2.) - chunk[3]);
+                    if idx == combined.len() - 3 {
+                        context.curve_to(x1, y1, x2, y2, f64::min(self.width, x3), half_height);
+                    } else {
+                        context.curve_to(x1,
+                                         y1,
+                                         x2,
+                                         y2,
+                                         f64::min(self.width, x3),
+                                         f64::min(y3, half_height));
+                    }
+                }
                 context.line_to(self.width, 0.);
                 context.line_to(0., 0.);
                 context.line_to(0., half_height);
@@ -120,15 +108,12 @@ impl Draw for GradientData {
                 context.move_to(0., combined[0]);
                 for (idx, chunk) in combined.chunks(4)
                     .enumerate()
-                        .map(|(idx, c)| (idx * 4 + 1, c)) {
-                            let (x1, y1) = ((idx + 1) as f64 * scale_x,
-                            (self.height / 2.) - chunk[1]);
-                            let (x2, y2) = ((idx + 2) as f64 * scale_x,
-                            (self.height / 2.) - chunk[2]);
-                            let (x3, y3) = ((idx + 3) as f64 * scale_x,
-                            (self.height / 2.) - chunk[3]);
-                            context.curve_to(x1, y1, x2, y2, f64::min(self.width, x3), y3);
-                        }
+                    .map(|(idx, c)| (idx * 4 + 1, c)) {
+                    let (x1, y1) = ((idx + 1) as f64 * scale_x, (self.height / 2.) - chunk[1]);
+                    let (x2, y2) = ((idx + 2) as f64 * scale_x, (self.height / 2.) - chunk[2]);
+                    let (x3, y3) = ((idx + 3) as f64 * scale_x, (self.height / 2.) - chunk[3]);
+                    context.curve_to(x1, y1, x2, y2, f64::min(self.width, x3), y3);
+                }
                 context.line_to(self.width, 0.);
                 context.line_to(0., 0.);
                 context.line_to(0., half_height);
@@ -142,8 +127,7 @@ impl Draw for GradientData {
         context.save();
         context.scale(1., -1.);
         call_rgba_fn!(context, set_source_rgba, self.bg_color);
-        context.translate(self.left_padding,
-                          -(self.top_padding + self.height));
+        context.translate(self.left_padding, -(self.top_padding + self.height));
         context.translate(0., -self.middle_line_height / 2.);
         // lower half
         draw_half();
@@ -158,7 +142,7 @@ impl Default for GradientData {
             height: 80.,
             width: 1200.,
             middle_line_height: 2.,
-            bg_color: Color(0.1, 0.1, 0.1, 0.0),
+            bg_color: Color(0.1, 0.1, 0.1, 1.),
             gradient_start: Color::green(),
             gradient_middle: Color(1., 150. / 255., 80. / 255., 1.),
             gradient_end: Color::magenta(),

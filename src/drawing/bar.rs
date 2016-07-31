@@ -44,10 +44,10 @@ impl Draw for BarData {
             shrink_by_averaging(&mut combined, self.num_bars);
             total_bars = self.num_bars;
         }
-        scale(&mut combined);
+        //scale(&mut combined);
         let draw_half: Box<Fn()> = Box::new(move || {
             for bar in 0..total_bars {
-                let chunks = f64::min(self.max_bar_pieces_vertical as f64, combined[bar] * self.max_bar_pieces_vertical as f64) as usize;
+                let chunks = f64::min(self.max_bar_pieces_vertical as f64, combined[bar] * (self.max_bar_pieces_vertical as f64 - 1.)) as usize + 1;
                 let x = bar as f64 * (self.bar_piece_width + self.bar_piece_horizontal_spacing);
                 for i in 0..chunks {
                     context.rectangle(x,
@@ -74,10 +74,10 @@ impl Default for BarData {
     fn default() -> Self {
         BarData {
             double_sided: false,
-            num_bars: 50,
+            num_bars: 30,
             split_audio_channels: false,
-            max_bar_pieces_vertical: 50,
-            bar_piece_width: 15.,
+            max_bar_pieces_vertical: 70,
+            bar_piece_width: 16.,
             bar_piece_height: 4.,
             bar_piece_horizontal_spacing: 1.,
             bar_piece_vertical_spacing: 1.,

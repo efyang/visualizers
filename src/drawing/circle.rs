@@ -35,7 +35,7 @@ impl Draw for CircleData {
             }
             shrink_by_averaging(&mut combined, 180);
         }
-        scale(&mut combined);
+        //scale(&mut combined);
 
         let mut points = Vec::new();
         let rotation_angle = match self.rotation {
@@ -73,8 +73,8 @@ impl Default for CircleData {
     fn default() -> Self {
         CircleData {
             split_audio_channels: false,
-            min_radius: 75.,
-            max_radius: 150.,
+            min_radius: 70.,
+            max_radius: 200.,
             draw_color: Color::black(),
             bg_color: Color::default_bg(),
             rotation: None,
