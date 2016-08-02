@@ -12,6 +12,7 @@ extern crate lazy_static;
 extern crate libc;
 extern crate libpulse_sys;
 extern crate pa_simple;
+extern crate serde;
 extern crate serde_yaml;
 
 mod app;
