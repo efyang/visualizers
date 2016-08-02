@@ -15,8 +15,7 @@ extern crate pa_simple;
 extern crate serde;
 extern crate serde_yaml;
 
-mod app;
-mod audio_process;
+mod app; mod audio_process;
 mod audio_devices;
 mod config;
 mod data_helpers;
@@ -82,7 +81,7 @@ fn main() {
         loop {
             // https://github.com/astro/rust-pulse-simple/issues/2
             // (1000ms / ms_sleep) * FRAMES >= SAMPLE_RATE (44100 in this case)
-            ::std::thread::sleep_ms(5);
+            //::std::thread::sleep_ms(5); -- desyncs audio - dont use it
             let newvec = processor.get_data_frame();
             *DATA.lock().unwrap() = newvec;
         }
