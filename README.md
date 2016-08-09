@@ -1,3 +1,6 @@
 # visualizers
 
-### Test audio visualizer (testing if windowing settings work)
+##### Rust Audio visualizer
+
+Design:
+![design](https://github.com/efyang/visualizers/raw/master/design.png)
