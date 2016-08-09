@@ -8,7 +8,7 @@ pub mod circle;
 pub mod gradient;
 
 pub use self::color::Color;
-pub use self::bar::BarData;
+pub use self::bar::{BarData, BarDataConfig};
 pub use self::circle::CircleData;
 pub use self::gradient::GradientData;
 
@@ -48,7 +48,6 @@ impl GetDrawArea for DrawingStyle {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
 pub enum DrawingStyle {
     Bars(BarData),
     Circle(CircleData),

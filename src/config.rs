@@ -4,7 +4,7 @@ use std::io;
 
 use serde_yaml::{from_reader, to_writer};
 use app_dirs::{get_app_dir, AppDirType};
-use drawing::DrawingStyle;
+use drawing::{DrawingStyle, BarData, CircleData, GradientData, BarDataConfig};
 
 const CONFIG_NAME: &'static str = "visualizers.yml";
 const CONFIG_DIR: &'static str = "visualizers";
@@ -23,9 +23,36 @@ lazy_static! {
 struct ConfigStructure(Vec<GtkVisualizerConfig>);
 
 #[derive(Serialize, Deserialize)]
+pub enum DrawingStyleConfig {
+    Bars(BarDataConfig),
+    Circle(CircleData),
+    Gradient(GradientData),
+}
+
+impl ConvertTo<DrawingStyleConfig> for DrawingStyle {
+    fn convert_to(&self) -> DrawingStyleConfig {
+        match *self {
+            DrawingStyle::Bars(ref bdata) => DrawingStyleConfig::Bars(bdata.convert_to()),
+            DrawingStyle::Circle(ref cdata) => DrawingStyleConfig::Circle(cdata.clone()),
+            DrawingStyle::Gradient(ref kgdata) => DrawingStyleConfig::Gradient(kgdata.clone()),
+        }
+    }
+}
+
+impl ConvertTo<DrawingStyle> for DrawingStyleConfig {
+    fn convert_to(&self) -> DrawingStyle {
+        match *self {
+            DrawingStyleConfig::Bars(ref bdata) => DrawingStyle::Bars(bdata.convert_to()),
+            DrawingStyleConfig::Circle(ref cdata) => DrawingStyle::Circle(cdata.clone()),
+            DrawingStyleConfig::Gradient(ref kgdata) => DrawingStyle::Gradient(kgdata.clone()),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct GtkVisualizerConfig {
     pub index: usize,
-    pub style: DrawingStyle,
+    pub style: DrawingStyleConfig,
     pub x_pos: usize,
     pub y_pos: usize,
 }

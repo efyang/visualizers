@@ -6,7 +6,9 @@ extern crate cairo;
 extern crate dft;
 extern crate gtk;
 extern crate gdk;
+extern crate gdk_pixbuf;
 extern crate gdk_sys;
+extern crate glib;
 #[macro_use]
 extern crate lazy_static;
 extern crate libc;
@@ -20,6 +22,8 @@ mod audio_devices;
 mod config;
 mod data_helpers;
 mod drawing;
+mod lockfile;
+mod icon;
 mod instance;
 
 use app::GtkVisualizerApp;
@@ -69,7 +73,7 @@ fn main() {
     window.show_all();
 
     // VERY IMPORTANT
-    gtk::timeout_add(20, move || {
+    gtk::timeout_add(30, move || {
         window.queue_draw();
         gtk::Continue(true)
     });
@@ -81,7 +85,7 @@ fn main() {
         loop {
             // https://github.com/astro/rust-pulse-simple/issues/2
             // (1000ms / ms_sleep) * FRAMES >= SAMPLE_RATE (44100 in this case)
-            ::std::thread::sleep_ms(5);
+            //::std::thread::sleep_ms(5);
             let newvec = processor.get_data_frame();
             *DATA.lock().unwrap() = newvec;
         }
