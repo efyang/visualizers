@@ -3,6 +3,7 @@ use dft;
 use dft::{Operation, Plan};
 use pa_simple::{Builder, Reader};
 
+pub type AudioFrame = Vec<Vec<f64>>;
 pub const FRAMES: usize = 256;
 
 pub struct AudioProcessor {
@@ -15,6 +16,9 @@ pub struct AudioProcessor {
     secondary_buffers: Vec<Vec<f64>>,
     previous: Vec<Vec<f64>>,
 }
+
+// needed to allow them to be used in a vector in a separate thread
+unsafe impl Send for AudioProcessor {}
 
 impl AudioProcessor {
     pub fn new(sources: &[Option<PaSourceInfo>], source_index: usize) -> Option<AudioProcessor> {
@@ -44,7 +48,7 @@ impl AudioProcessor {
     // NOTE: change this to allow an input of &mut [Vec<f64>] to prevent realloc?
     // get partially processed data from 1 reading
     // raw audio data -> fourier transform -> magnitude -> scale by impulse vec
-    pub fn get_data_frame(&mut self) -> Vec<Vec<f64>> {
+    pub fn get_data_frame(&mut self) -> AudioFrame {
         self.recorder.read(self.audio_buffer.as_mut_slice());
         // cast to f64
         for frame_n in 0..FRAMES {

@@ -17,14 +17,17 @@ extern crate pa_simple;
 extern crate serde;
 extern crate serde_yaml;
 
-mod app; mod audio_process;
+mod app;
+mod audio_process;
 mod audio_devices;
+mod audio_updater;
 mod config;
 mod data_helpers;
 mod drawing;
-mod lockfile;
 mod icon;
 mod instance;
+mod lockfile;
+mod message;
 
 use app::GtkVisualizerApp;
 

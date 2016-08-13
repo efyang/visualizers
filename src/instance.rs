@@ -1,4 +1,3 @@
-use app::{UpdateMessage, AudioFrame};
 use cairo::Operator;
 use gtk::prelude::*;
 use gtk::{Window, WindowType, WindowPosition};
@@ -6,7 +5,9 @@ use gdk::WindowTypeHint;
 use drawing::*;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
+use audio_process::AudioFrame;
 use config::{ConvertTo, GtkVisualizerConfig};
+use message::UpdateMessage;
 
 // how the hell do you update the drawing style when its getting used by 2 separate closures?
 // have instance have a Arc<Mutex<DrawingStyle>> and just mutate that
