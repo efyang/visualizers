@@ -1,5 +1,5 @@
 use cairo::Context;
-use super::{Draw, GetDrawArea};
+use super::Draw;
 use super::color::Color;
 use data_helpers::{shrink_by_averaging, scale};
 
@@ -62,6 +62,12 @@ impl Draw for CircleData {
         context.stroke();
         context.restore();
     }
+
+    fn draw_area(&self) -> (f64, f64) {
+        let diameter = 2. * self.max_radius;
+        (diameter + self.right_padding + self.left_padding,
+         diameter + self.top_padding + self.bottom_padding)
+    }
 }
 
 const RADIANS_PER_ANGLE: f64 = ::std::f64::consts::PI / 180.;
@@ -83,14 +89,6 @@ impl Default for CircleData {
             left_padding: 10.,
             right_padding: 10.,
         }
-    }
-}
-
-impl GetDrawArea for CircleData {
-    fn draw_area(&self) -> (f64, f64) {
-        let diameter = 2. * self.max_radius;
-        (diameter + self.right_padding + self.left_padding,
-         diameter + self.top_padding + self.bottom_padding)
     }
 }
 

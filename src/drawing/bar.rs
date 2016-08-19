@@ -1,13 +1,11 @@
 use cairo::Context;
 use super::color::Color;
-use super::{Draw, GetDrawArea};
-use super::super::config::ConvertTo;
+use super::Draw;
 use data_helpers::{shrink_by_averaging, scale};
 use std::cell::RefCell;
 
 impl Draw for BarData {
     fn draw(&self, context: &Context, data: &mut Vec<Vec<f64>>) {
-
         for buf in data.iter_mut() {
             scale_by_fft_max(buf);
         }
@@ -105,6 +103,29 @@ impl Draw for BarData {
             context.restore();
         }
     }
+
+    fn draw_area(&self) -> (f64, f64) {
+        let vert_mult;
+        if self.double_sided {
+            vert_mult = 2.;
+        } else {
+            vert_mult = 1.;
+        }
+        let hor_mult;
+        if self.split_audio_channels {
+            hor_mult = 2.;
+        } else {
+            hor_mult = 1.;
+        }
+        (hor_mult *
+         (self.bar_piece_width * self.num_bars as f64 +
+          self.bar_piece_horizontal_spacing * (self.num_bars as f64 - 1.)) +
+         self.right_padding + self.left_padding,
+         vert_mult *
+         (self.max_bar_pieces_vertical as f64 * self.bar_piece_height +
+          self.bar_piece_vertical_spacing * (self.max_bar_pieces_vertical as f64 - 1.)) +
+         self.top_padding + self.bottom_padding)
+    }
 }
 
 fn scale_by_fft_max(items: &mut [f64]) {
@@ -169,31 +190,6 @@ impl Default for BarData {
     }
 }
 
-impl GetDrawArea for BarData {
-    fn draw_area(&self) -> (f64, f64) {
-        let vert_mult;
-        if self.double_sided {
-            vert_mult = 2.;
-        } else {
-            vert_mult = 1.;
-        }
-        let hor_mult;
-        if self.split_audio_channels {
-            hor_mult = 2.;
-        } else {
-            hor_mult = 1.;
-        }
-        (hor_mult *
-         (self.bar_piece_width * self.num_bars as f64 +
-          self.bar_piece_horizontal_spacing * (self.num_bars as f64 - 1.)) +
-         self.right_padding + self.left_padding,
-         vert_mult *
-         (self.max_bar_pieces_vertical as f64 * self.bar_piece_height +
-          self.bar_piece_vertical_spacing * (self.max_bar_pieces_vertical as f64 - 1.)) +
-         self.top_padding + self.bottom_padding)
-    }
-}
-
 pub struct BarData {
     pub double_sided: bool,
     pub num_bars: usize,
@@ -211,65 +207,4 @@ pub struct BarData {
     pub left_padding: f64,
     pub right_padding: f64,
     pub peak_heights: RefCell<Vec<(isize, f64)>>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct BarDataConfig {
-    pub double_sided: bool,
-    pub num_bars: usize,
-    pub split_audio_channels: bool,
-    pub max_bar_pieces_vertical: usize,
-    pub bar_piece_width: f64,
-    pub bar_piece_height: f64,
-    pub bar_piece_horizontal_spacing: f64,
-    pub bar_piece_vertical_spacing: f64,
-    pub draw_color: Color,
-    pub bg_color: Color,
-    pub top_padding: f64,
-    pub bottom_padding: f64,
-    pub left_padding: f64,
-    pub right_padding: f64,
-}
-
-impl ConvertTo<BarDataConfig> for BarData {
-    fn convert_to(&self) -> BarDataConfig {
-        BarDataConfig {
-            double_sided: self.double_sided,
-            num_bars: self.num_bars,
-            split_audio_channels: self.split_audio_channels,
-            max_bar_pieces_vertical: self.max_bar_pieces_vertical,
-            bar_piece_width: self.bar_piece_width,
-            bar_piece_height: self.bar_piece_height,
-            bar_piece_horizontal_spacing: self.bar_piece_horizontal_spacing,
-            bar_piece_vertical_spacing: self.bar_piece_vertical_spacing,
-            draw_color: self.draw_color.clone(),
-            bg_color: self.bg_color.clone(),
-            top_padding: self.top_padding,
-            bottom_padding: self.bottom_padding,
-            left_padding: self.left_padding,
-            right_padding: self.right_padding,
-        }
-    }
-}
-
-impl ConvertTo<BarData> for BarDataConfig {
-    fn convert_to(&self) -> BarData {
-        BarData {
-            double_sided: self.double_sided,
-            num_bars: self.num_bars,
-            split_audio_channels: self.split_audio_channels,
-            max_bar_pieces_vertical: self.max_bar_pieces_vertical,
-            bar_piece_width: self.bar_piece_width,
-            bar_piece_height: self.bar_piece_height,
-            bar_piece_horizontal_spacing: self.bar_piece_horizontal_spacing,
-            bar_piece_vertical_spacing: self.bar_piece_vertical_spacing,
-            draw_color: self.draw_color.clone(),
-            bg_color: self.bg_color.clone(),
-            top_padding: self.top_padding,
-            bottom_padding: self.bottom_padding,
-            left_padding: self.left_padding,
-            right_padding: self.right_padding,
-            peak_heights: ::std::cell::RefCell::new(vec![(0, 0.); self.num_bars]),
-        }
-    }
 }

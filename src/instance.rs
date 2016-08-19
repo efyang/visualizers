@@ -6,25 +6,28 @@ use drawing::*;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
 use audio_process::AudioFrame;
-use config::{ConvertTo, GtkVisualizerConfig};
 use message::UpdateMessage;
 
 // how the hell do you update the drawing style when its getting used by 2 separate closures?
 // have instance have a Arc<Mutex<DrawingStyle>> and just mutate that
 pub struct GtkVisualizerInstance {
     id: usize,
-    index: usize,
+    pub index: usize,
     window: Window,
-    x_pos: usize,
-    y_pos: usize,
-    style: Arc<Mutex<DrawingStyle>>,
+    pub x_pos: usize,
+    pub y_pos: usize,
+    pub style: Arc<Mutex<DrawingStyle>>,
     msg_sender: Sender<UpdateMessage>,
     data_sources: Vec<Option<Arc<Mutex<AudioFrame>>>>,
 }
 
 impl GtkVisualizerInstance {
-    fn new(id: usize, x: usize, y: usize, index: usize, sources: &[Option<Arc<Mutex<AudioFrame>>>], update_sender: Sender<UpdateMessage>) -> Self {
+    pub fn new(id: usize, x: usize, y: usize, index: usize, sources: &[Option<Arc<Mutex<AudioFrame>>>], update_sender: Sender<UpdateMessage>) -> Self {
         let style = DrawingStyle::default();
+        Self::new_with_style(id, x, y, index, sources, style, update_sender)
+    }
+
+    pub fn new_with_style(id: usize, x: usize, y: usize, index: usize, sources: &[Option<Arc<Mutex<AudioFrame>>>], style: DrawingStyle, update_sender: Sender<UpdateMessage>) -> Self {
         let window = Window::new(WindowType::Toplevel);
         let (draw_send, draw_recv) = channel::<DrawingStyle>();
         // IMPLEMENT REST
@@ -40,6 +43,7 @@ impl GtkVisualizerInstance {
         };
         unimplemented!();
     }
+
 
     fn id(&self) -> usize {
         self.id
@@ -58,16 +62,6 @@ impl GtkVisualizerInstance {
     }
 }
 
-impl ConvertTo<GtkVisualizerConfig> for GtkVisualizerInstance {
-    fn convert_to(&self) -> GtkVisualizerConfig {
-        GtkVisualizerConfig {
-            index: self.index,
-            style: (*(self.style.lock().unwrap())).convert_to(),
-            x_pos: self.x_pos,
-            y_pos: self.y_pos,
-        }
-    }
-}
 
 // restructure later
 fn transparent_window(pos: WindowPosition) {

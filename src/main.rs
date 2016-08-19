@@ -31,7 +31,6 @@ mod message;
 
 use app::GtkVisualizerApp;
 
-// all placeholder testing
 use std::sync::{Arc, Mutex};
 use drawing::*;
 use audio_devices::PaSourceInfo;
@@ -53,7 +52,6 @@ fn main() {
     window.set_title("Test Program");
     window.set_default_size(WIDTH as i32, HEIGHT as i32);
     window.set_app_paintable(true);
-    // window.set_resizable(false);
     let screen = WindowExt::get_screen(&window).unwrap();
     if screen.is_composited() {
         if let Some(alpha_screen) = screen.get_rgba_visual() {

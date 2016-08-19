@@ -1,5 +1,5 @@
 use cairo::{Context, LinearGradient};
-use super::{Draw, GetDrawArea};
+use super::Draw;
 use data_helpers::{scale, map_multiply, shrink_by_averaging};
 use cairo::prelude::*;
 use super::color::Color;
@@ -133,6 +133,11 @@ impl Draw for GradientData {
         draw_half();
         context.restore();
     }
+
+    fn draw_area(&self) -> (f64, f64) {
+        (self.width + self.left_padding + self.right_padding,
+         self.height + self.top_padding + self.bottom_padding)
+    }
 }
 
 impl Default for GradientData {
@@ -152,13 +157,6 @@ impl Default for GradientData {
             left_padding: 10.,
             right_padding: 10.,
         }
-    }
-}
-
-impl GetDrawArea for GradientData {
-    fn draw_area(&self) -> (f64, f64) {
-        (self.width + self.left_padding + self.right_padding,
-         self.height + self.top_padding + self.bottom_padding)
     }
 }
 

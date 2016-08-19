@@ -5,7 +5,7 @@ use gtk::prelude::*;
 use audio_updater::AudioUpdater;
 use audio_devices::{get_devices, PaSourceInfo};
 use audio_process::{AudioProcessor, FRAMES, AudioFrame};
-use config::{ConvertTo, GtkVisualizerConfig};
+use config::read_config;
 use icon::default_status_icon;
 use instance::GtkVisualizerInstance;
 use gtk;
@@ -25,6 +25,13 @@ impl GtkVisualizerApp {
     // Only call this once
     fn initialize() -> GtkVisualizerApp {
         gtk::init().expect("Failed to initialize GTK");
+        // check if composited
+        let test_window = Window::new(WindowType::Toplevel);
+        let screen = WindowExt::get_screen(&test_window).unwrap();
+        assert!(screen.is_composited(), "Gtk is not composited");
+        drop(screen);
+        drop(test_window);
+
         let program_continue = Arc::new(Mutex::new(true));
 
         // NOTE: rename get_devices to get_sources
@@ -33,6 +40,7 @@ impl GtkVisualizerApp {
         let mut instances = HashMap::<usize, GtkVisualizerInstance>::new();
         let mut audio_processor_mappings = Vec::new();
         let (update_send, update_recv) = channel();
+        let instance_configs = read_config();
         // read from configs and initialize instances here
         // ...
         // ...
@@ -59,32 +67,17 @@ impl GtkVisualizerApp {
         // initialize and set icon callbacks
         // ...
         // ...
-        
+        let icon = default_status_icon().unwrap();
+
         GtkVisualizerApp {
             current_id_n: instances.len(),
             instances: instances,
-            icon: default_status_icon().unwrap(),
+            icon: icon,
             program_continue: program_continue,
         };
         unimplemented!()
     }
 
-    // maybe make this a result/bool later?
-    fn check_composited() {
-        // make a test window to test whether composited
-        let test_window = Window::new(WindowType::Toplevel);
-        let screen = WindowExt::get_screen(&test_window).unwrap();
-        assert!(screen.is_composited(), "Gtk is not composited");
-    }
-
-    // Update source information - this should never happen while the program is running afaik - it
-    // would require restarting all instances with new data
-    // fn update_sources(&mut self) -> Result<(), String> {
-    // let source_info = try!(get_devices());
-    // self.default_source_name = source_info.0;
-    // self.sources = source_info.1;
-    // Ok(())
-    // }
     pub fn main_iteration(&mut self) -> Result<(), String> {
         // iterate instances
         for instance in self.instances.iter_mut().map(|(_, i)| i) {
@@ -97,8 +90,3 @@ impl GtkVisualizerApp {
     }
 }
 
-impl ConvertTo<Vec<GtkVisualizerConfig>> for GtkVisualizerApp {
-    fn convert_to(&self) -> Vec<GtkVisualizerConfig> {
-        self.instances.values().map(|v| v.convert_to()).collect()
-    }
-}
