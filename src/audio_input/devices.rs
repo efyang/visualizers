@@ -4,7 +4,7 @@ use std::ffi::{CStr, CString};
 use std::ptr::{null, null_mut};
 
 // returns (default source, all sources)
-pub fn get_devices() -> Result<(String, Vec<Option<PaSourceInfo>>), String> {
+pub fn get_sources() -> Result<(String, Vec<Option<PaSourceInfo>>), String> {
     unsafe {
         let mainloop = pa_mainloop_new();
         let mainloop_ret_ptr = null_mut::<c_int>();

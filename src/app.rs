@@ -3,7 +3,7 @@ use std::sync::mpsc::{channel, Receiver};
 use std::sync::{Arc, Mutex};
 use gtk::prelude::*;
 use audio_input::AudioUpdater;
-use audio_input::{get_devices, PaSourceInfo};
+use audio_input::{get_sources, PaSourceInfo};
 use audio_input::{AudioProcessor, FRAMES, AudioFrame};
 use config::read_config;
 use icon::default_status_icon;
@@ -34,9 +34,8 @@ impl GtkVisualizerApp {
 
         let program_continue = Arc::new(Mutex::new(true));
 
-        // NOTE: rename get_devices to get_sources
         // initialize everything the audio updater needs
-        let (default_source_name, sources) = get_devices().expect("Could not get any audio devices");
+        let (default_source_name, sources) = get_sources().expect("Could not get any audio devices");
         let mut instances = HashMap::<usize, GtkVisualizerInstance>::new();
         let mut audio_processor_mappings = Vec::new();
         let (update_send, update_recv) = channel();

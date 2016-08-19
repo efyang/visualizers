@@ -77,7 +77,7 @@ fn main() {
     });
 
     ::std::thread::spawn(move || {
-        let (default_source_name, sources) = audio_input::get_devices().unwrap();
+        let (default_source_name, sources) = audio_input::get_sources().unwrap();
         let default_source_index = default_source_index(default_source_name, &sources).unwrap();
         let mut processor = AudioProcessor::new(&sources, default_source_index).unwrap();
         loop {
