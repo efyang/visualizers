@@ -18,9 +18,7 @@ extern crate serde;
 extern crate serde_yaml;
 
 mod app;
-mod audio_process;
-mod audio_devices;
-mod audio_updater;
+mod audio_input;
 mod config;
 mod data_helpers;
 mod drawing;
@@ -33,8 +31,7 @@ use app::GtkVisualizerApp;
 
 use std::sync::{Arc, Mutex};
 use drawing::*;
-use audio_devices::PaSourceInfo;
-use audio_process::AudioProcessor;
+use audio_input::{PaSourceInfo, AudioProcessor};
 use gtk::prelude::*;
 use gtk::{Window, WindowType};
 
@@ -80,7 +77,7 @@ fn main() {
     });
 
     ::std::thread::spawn(move || {
-        let (default_source_name, sources) = audio_devices::get_devices().unwrap();
+        let (default_source_name, sources) = audio_input::get_devices().unwrap();
         let default_source_index = default_source_index(default_source_name, &sources).unwrap();
         let mut processor = AudioProcessor::new(&sources, default_source_index).unwrap();
         loop {

@@ -1,10 +1,12 @@
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::Sender;
 
-use super::{ConvertTo, DrawingStyleConfig};
-use super::super::audio_process::AudioFrame;
-use super::super::message::UpdateMessage;
-use super::super::instance::GtkVisualizerInstance;
+use super::traits::ConvertTo;
+use super::drawingstyle::DrawingStyleConfig;
+
+use audio_input::AudioFrame;
+use message::UpdateMessage;
+use instance::GtkVisualizerInstance;
 
 #[derive(Serialize, Deserialize)]
 pub struct GtkVisualizerConfig {

@@ -5,7 +5,7 @@ use gdk::WindowTypeHint;
 use drawing::*;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
-use audio_process::AudioFrame;
+use audio_input::AudioFrame;
 use message::UpdateMessage;
 
 // how the hell do you update the drawing style when its getting used by 2 separate closures?

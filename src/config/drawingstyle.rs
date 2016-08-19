@@ -1,6 +1,7 @@
 use std::cell::RefCell;
+
 use super::traits::ConvertTo;
-use super::super::drawing::{Color, DrawingStyle, BarData, GradientData, CircleData};
+use drawing::{Color, DrawingStyle, BarData, GradientData, CircleData};
 
 #[derive(Serialize, Deserialize)]
 pub enum DrawingStyleConfig {

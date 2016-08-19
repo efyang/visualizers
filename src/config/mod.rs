@@ -1,11 +1,11 @@
 mod traits;
-pub mod drawingstyle;
+mod drawingstyle;
 mod app;
 mod instance;
 
-pub use self::traits::ConvertTo;
-pub use self::drawingstyle::DrawingStyleConfig;
-pub use self::instance::GtkVisualizerConfig;
+use self::traits::ConvertTo;
+use self::drawingstyle::DrawingStyleConfig;
+use self::instance::GtkVisualizerConfig;
 
 use std::fs::{File, create_dir_all};
 use std::path::PathBuf;
