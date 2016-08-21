@@ -1,8 +1,46 @@
 use cairo::{Context, LinearGradient};
+use cairo::prelude::*;
+
 use super::Draw;
 use data_helpers::{scale, map_multiply, shrink_by_averaging};
-use cairo::prelude::*;
 use super::color::Color;
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct GradientData {
+    pub split_audio_channels: bool,
+    pub height: f64,
+    pub width: f64,
+    pub middle_line_height: f64,
+    pub bg_color: Color,
+    pub gradient_start: Color,
+    pub gradient_middle: Color,
+    pub gradient_end: Color,
+    pub width_desensitivity: usize,
+    pub top_padding: f64,
+    pub bottom_padding: f64,
+    pub left_padding: f64,
+    pub right_padding: f64,
+}
+
+impl Default for GradientData {
+    fn default() -> Self {
+        GradientData {
+            split_audio_channels: true,
+            height: 80.,
+            width: 1200.,
+            middle_line_height: 2.,
+            bg_color: Color(0.1, 0.1, 0.1, 1.),
+            gradient_start: Color::green(),
+            gradient_middle: Color(1., 150. / 255., 80. / 255., 1.),
+            gradient_end: Color::magenta(),
+            width_desensitivity: 1,
+            top_padding: 10.,
+            bottom_padding: 10.,
+            left_padding: 10.,
+            right_padding: 10.,
+        }
+    }
+}
 
 impl Draw for GradientData {
     fn draw(&self, context: &Context, data: &mut Vec<Vec<f64>>) {
@@ -140,39 +178,3 @@ impl Draw for GradientData {
     }
 }
 
-impl Default for GradientData {
-    fn default() -> Self {
-        GradientData {
-            split_audio_channels: true,
-            height: 80.,
-            width: 1200.,
-            middle_line_height: 2.,
-            bg_color: Color(0.1, 0.1, 0.1, 1.),
-            gradient_start: Color::green(),
-            gradient_middle: Color(1., 150. / 255., 80. / 255., 1.),
-            gradient_end: Color::magenta(),
-            width_desensitivity: 1,
-            top_padding: 10.,
-            bottom_padding: 10.,
-            left_padding: 10.,
-            right_padding: 10.,
-        }
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct GradientData {
-    pub split_audio_channels: bool,
-    pub height: f64,
-    pub width: f64,
-    pub middle_line_height: f64,
-    pub bg_color: Color,
-    pub gradient_start: Color,
-    pub gradient_middle: Color,
-    pub gradient_end: Color,
-    pub width_desensitivity: usize,
-    pub top_padding: f64,
-    pub bottom_padding: f64,
-    pub left_padding: f64,
-    pub right_padding: f64,
-}

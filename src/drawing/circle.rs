@@ -3,6 +3,37 @@ use super::Draw;
 use super::color::Color;
 use data_helpers::{shrink_by_averaging, scale};
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CircleData {
+    pub split_audio_channels: bool,
+    pub min_radius: f64,
+    pub max_radius: f64,
+    pub draw_color: Color,
+    pub bg_color: Color,
+    pub rotation: Option<f64>, // degrees to rotate
+    pub top_padding: f64,
+    pub bottom_padding: f64,
+    pub left_padding: f64,
+    pub right_padding: f64,
+}
+
+impl Default for CircleData {
+    fn default() -> Self {
+        CircleData {
+            split_audio_channels: false,
+            min_radius: 70.,
+            max_radius: 200.,
+            draw_color: Color::black(),
+            bg_color: Color::default_bg(),
+            rotation: None,
+            top_padding: 10.,
+            bottom_padding: 10.,
+            left_padding: 10.,
+            right_padding: 10.,
+        }
+    }
+}
+
 impl Draw for CircleData {
     fn draw(&self, context: &Context, data: &mut Vec<Vec<f64>>) {
         context.save();
@@ -73,35 +104,4 @@ impl Draw for CircleData {
 const RADIANS_PER_ANGLE: f64 = ::std::f64::consts::PI / 180.;
 fn to_radians(angle: f64) -> f64 {
     angle * RADIANS_PER_ANGLE
-}
-
-impl Default for CircleData {
-    fn default() -> Self {
-        CircleData {
-            split_audio_channels: false,
-            min_radius: 70.,
-            max_radius: 200.,
-            draw_color: Color::black(),
-            bg_color: Color::default_bg(),
-            rotation: None,
-            top_padding: 10.,
-            bottom_padding: 10.,
-            left_padding: 10.,
-            right_padding: 10.,
-        }
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct CircleData {
-    pub split_audio_channels: bool,
-    pub min_radius: f64,
-    pub max_radius: f64,
-    pub draw_color: Color,
-    pub bg_color: Color,
-    pub rotation: Option<f64>, // degrees to rotate
-    pub top_padding: f64,
-    pub bottom_padding: f64,
-    pub left_padding: f64,
-    pub right_padding: f64,
 }

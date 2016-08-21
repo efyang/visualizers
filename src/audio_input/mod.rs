@@ -1,9 +1,10 @@
-mod devices;
+mod definitions;
 mod processor;
+mod sources;
 mod updater;
 
-pub use self::devices::{get_sources, PaSourceInfo};
-pub use self::processor::{AudioFrame, FRAMES};
+pub use self::definitions::{AudioFrame, FRAMES};
+pub use self::sources::{get_sources, PaSourceInfo};
 pub use self::updater::AudioUpdater;
 
 // NOTE: temporary placeholder for main

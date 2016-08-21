@@ -1,9 +1,12 @@
 use std::collections::HashMap;
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::{Arc, Mutex};
+
 use gtk::prelude::*;
-use super::devices::{get_sources, PaSourceInfo};
-use super::processor::{AudioProcessor, FRAMES, AudioFrame};
+
+use super::{AudioFrame, FRAMES};
+use super::{get_sources, PaSourceInfo};
+use super::processor::AudioProcessor;
 use message::UpdateMessage;
 
 pub struct AudioUpdater {

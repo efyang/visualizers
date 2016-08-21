@@ -1,6 +1,7 @@
+use app::GtkVisualizerApp;
+
 use super::traits::ConvertTo;
 use super::instance::GtkVisualizerConfig;
-use app::GtkVisualizerApp;
 
 #[derive(Serialize, Deserialize)]
 struct ConfigStructure(Vec<GtkVisualizerConfig>);

@@ -5,8 +5,8 @@ use super::traits::ConvertTo;
 use super::drawingstyle::DrawingStyleConfig;
 
 use audio_input::AudioFrame;
-use message::UpdateMessage;
 use instance::GtkVisualizerInstance;
+use message::UpdateMessage;
 
 #[derive(Serialize, Deserialize)]
 pub struct GtkVisualizerConfig {
@@ -28,8 +28,18 @@ impl Default for GtkVisualizerConfig {
 }
 
 impl GtkVisualizerConfig {
-    fn to_instance(self, id: usize, sources: &[Option<Arc<Mutex<AudioFrame>>>], update_sender: Sender<UpdateMessage>) -> GtkVisualizerInstance {
-        GtkVisualizerInstance::new_with_style(id, self.x_pos, self.y_pos, self.index, sources, self.style.convert_to(), update_sender)
+    fn to_instance(self,
+                   id: usize,
+                   sources: &[Option<Arc<Mutex<AudioFrame>>>],
+                   update_sender: Sender<UpdateMessage>)
+                   -> GtkVisualizerInstance {
+        GtkVisualizerInstance::new_with_style(id,
+                                              self.x_pos,
+                                              self.y_pos,
+                                              self.index,
+                                              sources,
+                                              self.style.convert_to(),
+                                              update_sender)
     }
 }
 

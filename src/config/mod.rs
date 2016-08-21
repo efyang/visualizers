@@ -3,10 +3,6 @@ mod drawingstyle;
 mod app;
 mod instance;
 
-use self::traits::ConvertTo;
-use self::drawingstyle::DrawingStyleConfig;
-use self::instance::GtkVisualizerConfig;
-
 use std::fs::{File, create_dir_all};
 use std::path::PathBuf;
 use std::io;
@@ -14,6 +10,10 @@ use std::io;
 use serde_yaml::{from_reader, to_writer};
 use app_dirs::{get_app_dir, AppDirType};
 use app::GtkVisualizerApp;
+
+use self::traits::ConvertTo;
+use self::drawingstyle::DrawingStyleConfig;
+use self::instance::GtkVisualizerConfig;
 
 const CONFIG_NAME: &'static str = "visualizers.yml";
 const CONFIG_DIR: &'static str = "visualizers";

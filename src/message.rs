@@ -1,4 +1,4 @@
-// used by both audio_updater.rs and instance.rs
+// used by both audio_input/updater.rs and instance.rs
 
 pub enum UpdateMessage {
     // id, index
@@ -6,5 +6,3 @@ pub enum UpdateMessage {
     // id, old index, new index
     ChangeMapping(usize, usize, usize),
 }
-
-

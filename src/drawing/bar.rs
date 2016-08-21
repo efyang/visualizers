@@ -1,8 +1,51 @@
+use std::cell::RefCell;
+
 use cairo::Context;
+
 use super::color::Color;
 use super::Draw;
-use data_helpers::{shrink_by_averaging, scale};
-use std::cell::RefCell;
+use data_helpers::{scale, shrink_by_averaging};
+
+pub struct BarData {
+    pub double_sided: bool,
+    pub num_bars: usize,
+    // draw channels seperately or average them into 1
+    pub split_audio_channels: bool,
+    pub max_bar_pieces_vertical: usize,
+    pub bar_piece_width: f64,
+    pub bar_piece_height: f64,
+    pub bar_piece_horizontal_spacing: f64,
+    pub bar_piece_vertical_spacing: f64,
+    pub draw_color: Color,
+    pub bg_color: Color,
+    pub top_padding: f64,
+    pub bottom_padding: f64,
+    pub left_padding: f64,
+    pub right_padding: f64,
+    pub peak_heights: RefCell<Vec<(isize, f64)>>,
+}
+
+impl Default for BarData {
+    fn default() -> Self {
+        BarData {
+            double_sided: false,
+            num_bars: 30,
+            split_audio_channels: false,
+            max_bar_pieces_vertical: 70,
+            bar_piece_width: 16.,
+            bar_piece_height: 4.,
+            bar_piece_horizontal_spacing: 1.,
+            bar_piece_vertical_spacing: 1.,
+            draw_color: Color::black(),
+            bg_color: Color::default_bg(),
+            top_padding: 10.,
+            bottom_padding: 10.,
+            left_padding: 10.,
+            right_padding: 10.,
+            peak_heights: RefCell::new(vec![(0, 0.); 70]),
+        }
+    }
+}
 
 impl Draw for BarData {
     fn draw(&self, context: &Context, data: &mut Vec<Vec<f64>>) {
@@ -168,43 +211,3 @@ const FFT_MAX: [f64; 256] =
      1088757., 1221378., 1358397., 1817252., 1255182., 1410357., 2264454., 1880361., 1630934.,
      1147988., 1919954., 1624734., 1373554., 1865118., 2431931.];
 
-impl Default for BarData {
-    fn default() -> Self {
-        BarData {
-            double_sided: false,
-            num_bars: 30,
-            split_audio_channels: false,
-            max_bar_pieces_vertical: 70,
-            bar_piece_width: 16.,
-            bar_piece_height: 4.,
-            bar_piece_horizontal_spacing: 1.,
-            bar_piece_vertical_spacing: 1.,
-            draw_color: Color::black(),
-            bg_color: Color::default_bg(),
-            top_padding: 10.,
-            bottom_padding: 10.,
-            left_padding: 10.,
-            right_padding: 10.,
-            peak_heights: RefCell::new(vec![(0, 0.); 70]),
-        }
-    }
-}
-
-pub struct BarData {
-    pub double_sided: bool,
-    pub num_bars: usize,
-    // draw channels seperately or average them into 1
-    pub split_audio_channels: bool,
-    pub max_bar_pieces_vertical: usize,
-    pub bar_piece_width: f64,
-    pub bar_piece_height: f64,
-    pub bar_piece_horizontal_spacing: f64,
-    pub bar_piece_vertical_spacing: f64,
-    pub draw_color: Color,
-    pub bg_color: Color,
-    pub top_padding: f64,
-    pub bottom_padding: f64,
-    pub left_padding: f64,
-    pub right_padding: f64,
-    pub peak_heights: RefCell<Vec<(isize, f64)>>,
-}

@@ -1,10 +1,8 @@
-use super::devices::PaSourceInfo;
 use dft;
 use dft::{Operation, Plan};
 use pa_simple::{Builder, Reader};
 
-pub type AudioFrame = Vec<Vec<f64>>;
-pub const FRAMES: usize = 256;
+use super::{AudioFrame, FRAMES, PaSourceInfo};
 
 pub struct AudioProcessor {
     source_index: usize,
