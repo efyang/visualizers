@@ -13,7 +13,7 @@ pub fn default_status_icon() -> Result<StatusIcon, String> {
                 return Err(format!("{}", e));
             }
             Ok(StatusIcon::new_from_pixbuf(&pb))
-        },
-        None => Err("Failed to load status icon.".to_string())
+        }
+        None => Err("Failed to load status icon.".to_string()),
     }
 }

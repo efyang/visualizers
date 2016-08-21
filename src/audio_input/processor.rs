@@ -33,9 +33,9 @@ impl AudioProcessor {
                         .rate(source.rate)
                         .device(&source.name)
                         .reader_i16(),
-                        audio_buffer: vec![0; FRAMES * source.channels as usize],
-                        secondary_buffers: vec![vec![0f64; FRAMES]; source.channels as usize],
-                        previous: vec![vec![0f64; FRAMES]; source.channels as usize],
+                    audio_buffer: vec![0; FRAMES * source.channels as usize],
+                    secondary_buffers: vec![vec![0f64; FRAMES]; source.channels as usize],
+                    previous: vec![vec![0f64; FRAMES]; source.channels as usize],
                 })
             }
             None => None,
@@ -53,15 +53,16 @@ impl AudioProcessor {
             let frame_idx = frame_n * self.channels;
             for channel_offset in 0..self.channels {
                 let orig_idx = frame_idx + channel_offset;
-                self.secondary_buffers[channel_offset][frame_n] = self.audio_buffer[orig_idx] as f64;
+                self.secondary_buffers[channel_offset][frame_n] =
+                    self.audio_buffer[orig_idx] as f64;
             }
         }
         let mut out_data = Vec::with_capacity(self.channels);
         for buf in self.secondary_buffers.iter_mut() {
             // perform fourier transform on each channel
-            //println!("{:?}", buf);
+            // println!("{:?}", buf);
             dft::transform(buf.as_mut_slice(), &self.dft_plan);
-            //println!("{:?}", buf);
+            // println!("{:?}", buf);
             // unpack
             out_data.push(dft::unpack(buf).iter().map(|ref c| c.norm_sqr().sqrt()).collect::<Vec<_>>());
         }
@@ -69,8 +70,11 @@ impl AudioProcessor {
         out_data
     }
 
-    pub fn channels(&self) -> usize {self.channels}
+    pub fn channels(&self) -> usize {
+        self.channels
+    }
 
-    pub fn source_index(&self) -> usize {self.source_index}
+    pub fn source_index(&self) -> usize {
+        self.source_index
+    }
 }
-

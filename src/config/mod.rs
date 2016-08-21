@@ -36,7 +36,10 @@ pub fn read_config() -> io::Result<Vec<GtkVisualizerConfig>> {
         let config = try!(File::open(CONFIG_PATH.as_path()));
         match from_reader(config) {
             Ok(read) => Ok(read),
-            Err(e) => Err(io::Error::new(io::ErrorKind::Other, format!("Error on reading config: {}", e))),
+            Err(e) => {
+                Err(io::Error::new(io::ErrorKind::Other,
+                                   format!("Error on reading config: {}", e)))
+            }
         }
     }
 }
@@ -44,7 +47,8 @@ pub fn read_config() -> io::Result<Vec<GtkVisualizerConfig>> {
 pub fn write_config(config: Vec<GtkVisualizerConfig>) -> io::Result<()> {
     let mut config_out = try!(create_config_file());
     if let Err(e) = to_writer(&mut config_out, &config) {
-        Err(io::Error::new(io::ErrorKind::Other, format!("Error on writing config: {}", e)))
+        Err(io::Error::new(io::ErrorKind::Other,
+                           format!("Error on writing config: {}", e)))
     } else {
         Ok(())
     }

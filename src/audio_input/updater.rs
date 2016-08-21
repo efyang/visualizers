@@ -24,7 +24,13 @@ pub struct AudioUpdater {
 }
 
 impl AudioUpdater {
-    pub fn new(default_source_name: &str, sources: Vec<Option<PaSourceInfo>>, audio_processor_mappings: Vec<Option<(AudioProcessor, Vec<usize>)>>, msg_receiver: Receiver<UpdateMessage>, data: Vec<Option<Arc<Mutex<AudioFrame>>>>, program_continue: Arc<Mutex<bool>>) -> Self {
+    pub fn new(default_source_name: &str,
+               sources: Vec<Option<PaSourceInfo>>,
+               audio_processor_mappings: Vec<Option<(AudioProcessor, Vec<usize>)>>,
+               msg_receiver: Receiver<UpdateMessage>,
+               data: Vec<Option<Arc<Mutex<AudioFrame>>>>,
+               program_continue: Arc<Mutex<bool>>)
+               -> Self {
         AudioUpdater {
             default_source_name: default_source_name.to_string(),
             sources: sources,

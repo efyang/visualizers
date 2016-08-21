@@ -52,8 +52,8 @@ pub fn scale_to_maximum(items: &mut Vec<f64>, maximum: f64) {
     let minimum = items.iter().cloned().fold(0. / 0., f64::min);
     if maximum != 0. && maximum != ::std::f64::NEG_INFINITY {
         for item in items.iter_mut() {
-            //*item = item.log(maximum);
-            //*item = (*item - minimum) / (maximum - minimum);
+            // *item = item.log(maximum);
+            // *item = (*item - minimum) / (maximum - minimum);
             *item = *item / maximum;
         }
     }

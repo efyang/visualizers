@@ -7,7 +7,7 @@ lazy_static! {
 }
 
 pub struct LockFile {
-    pb: PathBuf
+    pb: PathBuf,
 }
 
 impl LockFile {
@@ -17,10 +17,8 @@ impl LockFile {
             None
         } else {
             match File::create(&path) {
-                Ok(_) => Some(LockFile {
-                    pb: path.to_path_buf()
-                }),
-                Err(_) => None
+                Ok(_) => Some(LockFile { pb: path.to_path_buf() }),
+                Err(_) => None,
             }
         }
     }

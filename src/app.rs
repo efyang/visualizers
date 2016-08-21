@@ -18,7 +18,7 @@ pub struct GtkVisualizerApp {
     current_id_n: usize,
     pub instances: HashMap<usize, GtkVisualizerInstance>,
     icon: StatusIcon,
-    program_continue: Arc<Mutex<bool>>, // whether the program whould continue, shared by app, all instances, and audio updater
+    program_continue: Arc<Mutex<bool>>, /* whether the program whould continue, shared by app, all instances, and audio updater */
 }
 
 impl GtkVisualizerApp {
@@ -35,7 +35,8 @@ impl GtkVisualizerApp {
         let program_continue = Arc::new(Mutex::new(true));
 
         // initialize everything the audio updater needs
-        let (default_source_name, sources) = get_sources().expect("Could not get any audio devices");
+        let (default_source_name, sources) = get_sources()
+            .expect("Could not get any audio devices");
         let mut instances = HashMap::<usize, GtkVisualizerInstance>::new();
         let mut audio_processor_mappings = Vec::new();
         let (update_send, update_recv) = channel();
@@ -52,7 +53,12 @@ impl GtkVisualizerApp {
 
         {
             let program_continue = program_continue.clone();
-            let mut updater = AudioUpdater::new(&default_source_name, sources, audio_processor_mappings, update_recv, current_data, program_continue.clone());
+            let mut updater = AudioUpdater::new(&default_source_name,
+                                                sources,
+                                                audio_processor_mappings,
+                                                update_recv,
+                                                current_data,
+                                                program_continue.clone());
             ::std::thread::spawn(move || {
                 // startup the audio updater
                 loop {
@@ -88,4 +94,3 @@ impl GtkVisualizerApp {
         Ok(())
     }
 }
-

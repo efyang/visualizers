@@ -66,7 +66,7 @@ impl Draw for CircleData {
             }
             shrink_by_averaging(&mut combined, 180);
         }
-        //scale(&mut combined);
+        // scale(&mut combined);
 
         let mut points = Vec::new();
         let rotation_angle = match self.rotation {

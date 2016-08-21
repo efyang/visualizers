@@ -177,4 +177,3 @@ impl Draw for GradientData {
          self.height + self.top_padding + self.bottom_padding)
     }
 }
-

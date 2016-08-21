@@ -22,12 +22,25 @@ pub struct GtkVisualizerInstance {
 }
 
 impl GtkVisualizerInstance {
-    pub fn new(id: usize, x: usize, y: usize, index: usize, sources: &[Option<Arc<Mutex<AudioFrame>>>], update_sender: Sender<UpdateMessage>) -> Self {
+    pub fn new(id: usize,
+               x: usize,
+               y: usize,
+               index: usize,
+               sources: &[Option<Arc<Mutex<AudioFrame>>>],
+               update_sender: Sender<UpdateMessage>)
+               -> Self {
         let style = DrawingStyle::default();
         Self::new_with_style(id, x, y, index, sources, style, update_sender)
     }
 
-    pub fn new_with_style(id: usize, x: usize, y: usize, index: usize, sources: &[Option<Arc<Mutex<AudioFrame>>>], style: DrawingStyle, update_sender: Sender<UpdateMessage>) -> Self {
+    pub fn new_with_style(id: usize,
+                          x: usize,
+                          y: usize,
+                          index: usize,
+                          sources: &[Option<Arc<Mutex<AudioFrame>>>],
+                          style: DrawingStyle,
+                          update_sender: Sender<UpdateMessage>)
+                          -> Self {
         let window = Window::new(WindowType::Toplevel);
         let (draw_send, draw_recv) = channel::<DrawingStyle>();
         // IMPLEMENT REST
