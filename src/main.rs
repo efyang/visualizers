@@ -22,6 +22,7 @@ mod audio_input;
 mod config;
 mod data_helpers;
 mod drawing;
+mod gtk_helpers;
 mod icon;
 mod instance;
 mod lockfile;

@@ -28,7 +28,7 @@ impl Default for GtkVisualizerConfig {
 }
 
 impl GtkVisualizerConfig {
-    fn to_instance(self,
+    pub fn to_instance(self,
                    id: usize,
                    sources: &[Option<Arc<Mutex<AudioFrame>>>],
                    update_sender: Sender<UpdateMessage>)
@@ -46,10 +46,10 @@ impl GtkVisualizerConfig {
 impl ConvertTo<GtkVisualizerConfig> for GtkVisualizerInstance {
     fn convert_to(&self) -> GtkVisualizerConfig {
         GtkVisualizerConfig {
-            index: self.index,
+            index: (*(self.index.lock().unwrap())),
             style: (*(self.style.lock().unwrap())).convert_to(),
-            x_pos: self.x_pos,
-            y_pos: self.y_pos,
+            x_pos: (*(self.x_pos.lock().unwrap())),
+            y_pos: (*(self.y_pos.lock().unwrap())),
         }
     }
 }

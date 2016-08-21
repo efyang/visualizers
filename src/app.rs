@@ -40,16 +40,18 @@ impl GtkVisualizerApp {
         let mut instances = HashMap::<usize, GtkVisualizerInstance>::new();
         let mut audio_processor_mappings = Vec::new();
         let (update_send, update_recv) = channel();
-        let instance_configs = read_config();
-        // read from configs and initialize instances here
-        // ...
-        // ...
-        let mut current_data = Vec::new();
-        // for (id, mut instance) in instances.iter_mut() {
-        // let data_source = current_data.entry(instance.index())
-        // .or_insert(Arc::new(Mutex::new(vec![vec![0f64; FRAMES]])));
-        // instance.show_all();
-        // }
+        let mut current_data = sources
+            .iter()
+            .map(|_| Some(Arc::new(Mutex::new(vec![vec![0.; FRAMES]; 2]))))
+            .collect::<Vec<_>>();
+        let instance_configs = read_config().unwrap();
+        let mut instance_id = 0;
+        for config in instance_configs {
+            let instance = config.to_instance(instance_id, &current_data, update_send.clone());
+            instance.show_all();
+            instances.insert(instance_id, instance);
+            instance_id += 1;
+        }
 
         {
             let program_continue = program_continue.clone();
@@ -69,13 +71,14 @@ impl GtkVisualizerApp {
                 }
             });
         }
+
         // initialize and set icon callbacks
         // ...
         // ...
         let icon = default_status_icon().unwrap();
 
         GtkVisualizerApp {
-            current_id_n: instances.len(),
+            current_id_n: instance_id,
             instances: instances,
             icon: icon,
             program_continue: program_continue,

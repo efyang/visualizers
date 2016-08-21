@@ -113,8 +113,11 @@ impl AudioUpdater {
         for mapping in self.audio_processor_mappings.iter_mut() {
             if let Some((ref mut processor, _)) = *mapping {
                 let data = processor.get_data_frame();
-                *self.current_data[processor.source_index()].as_ref().unwrap().lock().unwrap() =
-                    data;
+                *self.current_data[processor.source_index()]
+                    .as_ref()
+                    .unwrap()
+                    .lock()
+                    .unwrap() = data;
             }
         }
         Ok(())
