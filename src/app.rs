@@ -42,7 +42,7 @@ impl GtkVisualizerApp {
         let (update_send, update_recv) = channel();
         let mut current_data = sources
             .iter()
-            .map(|_| Some(Arc::new(Mutex::new(vec![vec![0.; FRAMES]; 2]))))
+            .map(|_| Arc::new(Mutex::new(None)))
             .collect::<Vec<_>>();
         let instance_configs = read_config().unwrap();
         let mut instance_id = 0;

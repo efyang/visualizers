@@ -8,6 +8,7 @@ use super::{AudioFrame, FRAMES};
 use super::{get_sources, PaSourceInfo};
 use super::processor::AudioProcessor;
 use message::UpdateMessage;
+use shared_data::SharedData;
 
 pub struct AudioUpdater {
     default_source_name: String,
@@ -19,7 +20,7 @@ pub struct AudioUpdater {
     pub audio_processor_mappings: Vec<Option<(AudioProcessor, Vec<usize>)>>,
     // receiver for deletion messages
     msg_receiver: Receiver<UpdateMessage>,
-    pub current_data: Vec<Option<Arc<Mutex<AudioFrame>>>>,
+    pub current_data: Vec<SharedData>,
     program_continue: Arc<Mutex<bool>>,
 }
 
@@ -28,7 +29,7 @@ impl AudioUpdater {
                sources: Vec<Option<PaSourceInfo>>,
                audio_processor_mappings: Vec<Option<(AudioProcessor, Vec<usize>)>>,
                msg_receiver: Receiver<UpdateMessage>,
-               data: Vec<Option<Arc<Mutex<AudioFrame>>>>,
+               data: Vec<SharedData>,
                program_continue: Arc<Mutex<bool>>)
                -> Self {
         AudioUpdater {
@@ -67,7 +68,7 @@ impl AudioUpdater {
         // remove audio processor if no more instances are using it
         if rm_audio_processor {
             self.audio_processor_mappings[index] = None;
-            self.current_data[index] = None;
+            *self.current_data[index].lock().unwrap() = None;
         }
     }
 
@@ -79,8 +80,8 @@ impl AudioUpdater {
         // if the processor doesn't exist, create it
         match AudioProcessor::new(self.sources.as_slice(), index) {
             Some(processor) => {
-                self.current_data[index] =
-                    Some(Arc::new(Mutex::new(vec![vec![0f64; FRAMES]; processor.channels()])));
+                *self.current_data[index].lock().unwrap() =
+                    Some(vec![vec![0f64; FRAMES]; processor.channels()]);
                 self.audio_processor_mappings[index] = Some((processor, vec![id]));
                 Ok(())
             }
@@ -114,10 +115,8 @@ impl AudioUpdater {
             if let Some((ref mut processor, _)) = *mapping {
                 let data = processor.get_data_frame();
                 *self.current_data[processor.source_index()]
-                    .as_ref()
-                    .unwrap()
                     .lock()
-                    .unwrap() = data;
+                    .unwrap() = Some(data);
             }
         }
         Ok(())

@@ -27,6 +27,7 @@ mod icon;
 mod instance;
 mod lockfile;
 mod message;
+mod shared_data;
 
 use app::GtkVisualizerApp;
 

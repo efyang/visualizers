@@ -7,6 +7,7 @@ use super::drawingstyle::DrawingStyleConfig;
 use audio_input::AudioFrame;
 use instance::GtkVisualizerInstance;
 use message::UpdateMessage;
+use shared_data::SharedData;
 
 #[derive(Serialize, Deserialize)]
 pub struct GtkVisualizerConfig {
@@ -30,7 +31,7 @@ impl Default for GtkVisualizerConfig {
 impl GtkVisualizerConfig {
     pub fn to_instance(self,
                    id: usize,
-                   sources: &[Option<Arc<Mutex<AudioFrame>>>],
+                   sources: &[SharedData],
                    update_sender: Sender<UpdateMessage>)
                    -> GtkVisualizerInstance {
         GtkVisualizerInstance::new_with_style(id,

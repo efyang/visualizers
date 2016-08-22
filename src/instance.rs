@@ -6,10 +6,11 @@ use gdk::WindowTypeHint;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
 
-use drawing::*;
 use audio_input::AudioFrame;
+use drawing::*;
 use gtk_helpers::is_right_click;
 use message::UpdateMessage;
+use shared_data::SharedData;
 
 // how the hell do you update the drawing style when its getting used by 2 separate closures?
 // have instance have a Arc<Mutex<DrawingStyle>> and just mutate that
@@ -21,7 +22,7 @@ pub struct GtkVisualizerInstance {
     pub y_pos: Arc<Mutex<usize>>,
     pub style: Arc<Mutex<DrawingStyle>>,
     msg_sender: Sender<UpdateMessage>,
-    data_sources: Vec<Option<Arc<Mutex<AudioFrame>>>>,
+    data_sources: Vec<SharedData>,
 }
 
 macro_rules! clone_local {
@@ -35,7 +36,7 @@ impl GtkVisualizerInstance {
                x: usize,
                y: usize,
                index: usize,
-               sources: &[Option<Arc<Mutex<AudioFrame>>>],
+               sources: &[SharedData],
                update_sender: Sender<UpdateMessage>)
                -> Self {
         let style = DrawingStyle::default();
@@ -46,7 +47,7 @@ impl GtkVisualizerInstance {
                           x: usize,
                           y: usize,
                           index: usize,
-                          sources: &[Option<Arc<Mutex<AudioFrame>>>],
+                          sources: &[SharedData],
                           style: DrawingStyle,
                           update_sender: Sender<UpdateMessage>)
                           -> Self {
@@ -79,10 +80,13 @@ impl GtkVisualizerInstance {
                     let (width, height) = style.draw_area();
                     window.resize(width as i32, height as i32);
                     // get the source data
-                    match sources[*index.lock().unwrap()] {
-                        Some(ref source) => {
+                    let ref item = sources[index.lock().unwrap().clone()];
+                    // dunno whether to clone or not, just clone for now i guess
+                    let mut unwrapped = item.lock().unwrap().clone();
+                    match unwrapped {
+                        Some(ref mut source) => {
                             // draw it
-                            style.draw(context, &mut *source.lock().unwrap());
+                            style.draw(context, source);
                         }
                         // Audio Processor not ready yet
                         None => {}
