@@ -30,8 +30,9 @@ lazy_static! {
 
 pub fn read_config() -> io::Result<Vec<GtkVisualizerConfig>> {
     if !CONFIG_PATH.exists() {
-        try!(create_config_file());
-        Ok(vec![])
+        let def_vec = vec![GtkVisualizerConfig::default()];
+        try!(write_config(&def_vec));
+        Ok(def_vec)
     } else {
         let config = try!(File::open(CONFIG_PATH.as_path()));
         match from_reader(config) {
@@ -44,7 +45,7 @@ pub fn read_config() -> io::Result<Vec<GtkVisualizerConfig>> {
     }
 }
 
-pub fn write_config(config: Vec<GtkVisualizerConfig>) -> io::Result<()> {
+pub fn write_config(config: &Vec<GtkVisualizerConfig>) -> io::Result<()> {
     let mut config_out = try!(create_config_file());
     if let Err(e) = to_writer(&mut config_out, &config) {
         Err(io::Error::new(io::ErrorKind::Other,

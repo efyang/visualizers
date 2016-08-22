@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::mpsc::{channel, Receiver};
+use std::sync::mpsc::{channel, Receiver, TryRecvError};
 use std::sync::{Arc, Mutex};
 
 use gtk::prelude::*;
@@ -97,7 +97,9 @@ impl AudioUpdater {
             UpdateMessage::ChangeMapping(id, old_idx, new_idx) => {
                 try!(self.assign_id_to_index(id, new_idx));
                 self.remove_id_from_index(id, old_idx);
-                // set it to the new data source
+            }
+            UpdateMessage::Add(id, index) => {
+                try!(self.assign_id_to_index(id, index));
             }
         }
         Ok(())
@@ -107,7 +109,12 @@ impl AudioUpdater {
         // check all messages
         match self.msg_receiver.try_recv() {
             Ok(m) => try!(self.handle_message(m)),
-            Err(e) => return Err(format!("{}", e)),
+            Err(e) => match e {
+                TryRecvError::Empty => {},
+                TryRecvError::Disconnected => {
+                    return Err(format!("{}", e));
+                }
+            },
         }
 
         // set data from audio processors

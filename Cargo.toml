@@ -18,6 +18,7 @@ libpulse-sys = "0.0.0"
 serde = "0.8.*"
 serde_macros = "0.8.*"
 serde_yaml = "0.4.0"
+time = "0.1.35"
 
 [dependencies.pa_simple]
 git = "https://github.com/efyang/pa-simple-rs"

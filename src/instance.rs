@@ -1,7 +1,9 @@
 use cairo::Operator;
 use gtk::prelude::*;
 use gtk::{Window, WindowType, WindowPosition, Menu, MenuItem};
+use gtk;
 use gdk::WindowTypeHint;
+use time::precise_time_ns;
 
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
@@ -11,6 +13,9 @@ use drawing::*;
 use gtk_helpers::is_right_click;
 use message::UpdateMessage;
 use shared_data::SharedData;
+
+// make this changeable in program settings later on: Arc<Mutex> for each instance
+const DRAW_UPDATE_TIME: u64 = 1000_000_000; // ns or 500 ms
 
 // how the hell do you update the drawing style when its getting used by 2 separate closures?
 // have instance have a Arc<Mutex<DrawingStyle>> and just mutate that
@@ -23,6 +28,7 @@ pub struct GtkVisualizerInstance {
     pub style: Arc<Mutex<DrawingStyle>>,
     msg_sender: Sender<UpdateMessage>,
     data_sources: Vec<SharedData>,
+    last_drawn: u64,
 }
 
 macro_rules! clone_local {
@@ -63,6 +69,14 @@ impl GtkVisualizerInstance {
         window.set_skip_taskbar_hint(true);
         window.set_keep_below(true);
         window.set_app_paintable(true);
+        let screen = WindowExt::get_screen(&window).unwrap();
+        if screen.is_composited() {
+            if let Some(alpha_screen) = screen.get_rgba_visual() {
+                window.set_visual(Some(&alpha_screen));
+            }
+        } else {
+            panic!("Cannot use non-composited screen");
+        }
 
         let index = Arc::new(Mutex::new(index));
         let x_pos = Arc::new(Mutex::new(x));
@@ -141,7 +155,6 @@ impl GtkVisualizerInstance {
             });
         }
 
-        // IMPLEMENT REST
         GtkVisualizerInstance {
             id: id,
             index: index,
@@ -151,6 +164,7 @@ impl GtkVisualizerInstance {
             style: style,
             msg_sender: update_sender,
             data_sources: sources,
+            last_drawn: precise_time_ns(),
         }
     }
 
@@ -168,7 +182,10 @@ impl GtkVisualizerInstance {
 
     pub fn iterate(&mut self) {
         // add a custom timer or use gtk::timout_add?
-        // self.window.queue_draw();
+        let time_now = precise_time_ns();
+        if time_now > self.last_drawn + DRAW_UPDATE_TIME {
+            self.window.queue_draw();
+        }
         // unimplemented!()
     }
 }

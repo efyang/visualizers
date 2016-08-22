@@ -5,4 +5,6 @@ pub enum UpdateMessage {
     Destroy(usize, usize),
     // id, old index, new index
     ChangeMapping(usize, usize, usize),
+    // id, index
+    Add(usize, usize),
 }
