@@ -49,7 +49,7 @@ pub fn expand_by_clone(items: &mut Vec<f64>, n: usize) -> Vec<f64> {
 }
 
 pub fn scale_to_maximum(items: &mut Vec<f64>, maximum: f64) {
-    let minimum = items.iter().cloned().fold(0. / 0., f64::min);
+    let minimum = items.iter().cloned().fold(::std::f64::NAN, f64::min);
     if maximum != 0. && maximum != ::std::f64::NEG_INFINITY {
         for item in items.iter_mut() {
             // *item = item.log(maximum);
@@ -116,7 +116,7 @@ fn test_expand_by_clone_2() {
 
 pub fn scale(items: &mut Vec<f64>) {
     // https://www.reddit.com/r/rust/comments/3fg0xr/how_do_i_find_the_max_value_in_a_vecf64/
-    let maximum = items.iter().cloned().fold(0. / 0., f64::max);
+    let maximum = items.iter().cloned().fold(::std::f64::NAN, f64::max);
     scale_to_maximum(items, maximum);
 }
 

@@ -93,11 +93,11 @@ impl GtkVisualizerInstance {
             window.connect_draw(move |window, context| {
                 {
                     // resize to the needed draw size
-                    let ref style = *style.borrow();
+                    let style = &*style.borrow();
                     let (width, height) = style.draw_area();
                     window.resize(width as i32, height as i32);
                     // get the source data
-                    let ref item = sources[*index.borrow()];
+                    let item = &sources[*index.borrow()];
                     let mut unwrapped = item.lock().unwrap().clone();
                     match unwrapped {
                         Some(ref mut source) => {

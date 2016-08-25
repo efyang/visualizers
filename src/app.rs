@@ -9,6 +9,7 @@ use gtk::{StatusIcon, Window, WindowType};
 use audio_input::AudioUpdater;
 use audio_input::{get_sources, PaSourceInfo};
 use audio_input::{AudioProcessor, FRAMES, AudioFrame};
+use shared_data::ContinueState;
 use config::read_config;
 use icon::default_status_icon;
 use instance::GtkVisualizerInstance;
@@ -21,7 +22,7 @@ pub struct GtkVisualizerApp {
     current_id_n: usize,
     pub instances: HashMap<usize, GtkVisualizerInstance>,
     icon: StatusIcon,
-    program_continue: Arc<Mutex<bool>>, /* whether the program whould continue, shared by app, all instances, and audio updater */
+    program_continue: ContinueState, /* whether the program whould continue, shared by app, all instances, and audio updater */
 }
 
 impl GtkVisualizerApp {
@@ -35,7 +36,7 @@ impl GtkVisualizerApp {
         drop(screen);
         drop(test_window);
 
-        let program_continue = Arc::new(Mutex::new(true));
+        let program_continue = ContinueState::new(true);
 
         // initialize everything the audio updater needs
         let (default_source_name, sources) = get_sources()
@@ -99,7 +100,7 @@ impl GtkVisualizerApp {
         }
 
         // run the actual gtk iteration
-        if !*self.program_continue.lock().unwrap() {
+        if self.program_continue.get() {
             Err("Program ended".to_string())
         } else {
             gtk::main_iteration();

@@ -8,7 +8,7 @@ use super::{AudioFrame, FRAMES};
 use super::{get_sources, PaSourceInfo};
 use super::processor::AudioProcessor;
 use message::UpdateMessage;
-use shared_data::SharedData;
+use shared_data::{SharedData, ContinueState};
 
 pub struct AudioUpdater {
     default_source_name: String,
@@ -21,7 +21,7 @@ pub struct AudioUpdater {
     // receiver for deletion messages
     msg_receiver: Receiver<UpdateMessage>,
     pub current_data: Vec<SharedData>,
-    program_continue: Arc<Mutex<bool>>,
+    program_continue: ContinueState,
 }
 
 impl AudioUpdater {
@@ -30,7 +30,7 @@ impl AudioUpdater {
                audio_processor_mappings: Vec<Option<(AudioProcessor, Vec<usize>)>>,
                msg_receiver: Receiver<UpdateMessage>,
                data: Vec<SharedData>,
-               program_continue: Arc<Mutex<bool>>)
+               program_continue: ContinueState)
                -> Self {
         AudioUpdater {
             default_source_name: default_source_name.to_string(),
