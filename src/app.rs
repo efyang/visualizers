@@ -100,7 +100,7 @@ impl GtkVisualizerApp {
         }
 
         // run the actual gtk iteration
-        if self.program_continue.get() {
+        if !self.program_continue.get() {
             Err("Program ended".to_string())
         } else {
             gtk::main_iteration();
