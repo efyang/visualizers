@@ -103,7 +103,9 @@ impl GtkVisualizerApp {
         if !self.program_continue.get() {
             Err("Program ended".to_string())
         } else {
-            gtk::main_iteration();
+            while gtk::events_pending() {
+                gtk::main_iteration();
+            }
             Ok(())
         }
     }

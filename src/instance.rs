@@ -116,41 +116,48 @@ impl GtkVisualizerInstance {
         }
 
         // Setup right click context menu
+        // workaround for weird double popups (BUG)
+        let already_spawned_popup = Rc::new(RefCell::new(false));
         {
-            clone_local!(index, x_pos, y_pos, style);
+            clone_local!(index, x_pos, y_pos, style, already_spawned_popup);
             window.connect_button_release_event(move |window, ebutton| {
                 if is_right_click(ebutton) {
-                    let (x, y) = ebutton.get_position();
-                    let time = ebutton.get_time();
-                    // create right click menu
-                    let right_click_menu = Menu::new();
-                    let menu_buttons = ["Close this instance", "Edit instance settings"];
-                    for name in menu_buttons.iter() {
-                        let item = MenuItem::new_with_label(name);
-                        item.set_name(name);
-                        right_click_menu.append(&item);
-                    }
-                    // null item workaround - unknown if still necessary
-                    // let null_item = gtk::MenuItem::new_with_label("");
-                    // null_item.set_name("None");
-                    // right_click_menu.add(&null_item);
-                    right_click_menu.set_active(menu_buttons.len() as u32);
-                    right_click_menu.show_all();
-                    // null_item.hide();
-                    right_click_menu.popup_easy(3, time);
-
-                    // right click menu callbacks
-                    right_click_menu.connect_hide(move |this| {
-                        if let Some(selection) = this.get_active() {
-                            // get the index of the item
-                            match &selection.get_name().unwrap() as &str {
-                                "Close this instance" => {}
-                                "Edit instance settings" => {}
-                                _ => {}
-                            }
+                    if !*already_spawned_popup.borrow() {
+                        *already_spawned_popup.borrow_mut() = true;
+                        
+                        let time = ebutton.get_time();
+                        // create right click menu
+                        let right_click_menu = Menu::new();
+                        let menu_buttons = ["Close this instance", "Edit instance settings"];
+                        for name in menu_buttons.iter() {
+                            let item = MenuItem::new_with_label(name);
+                            item.set_name(name);
+                            right_click_menu.append(&item);
                         }
-                        this.destroy();
-                    });
+                        // null item workaround - to detect if no buttons clicked
+                        let null_item = gtk::MenuItem::new_with_label("");
+                        null_item.set_name("None");
+                        right_click_menu.add(&null_item);
+                        right_click_menu.set_active(menu_buttons.len() as u32);
+                        right_click_menu.show_all();
+                        null_item.hide();
+                        right_click_menu.popup_easy(3, time);
+
+                        // right click menu callbacks
+                        let already_spawned_popup = already_spawned_popup.clone();
+                        right_click_menu.connect_hide(move |this| {
+                            if let Some(selection) = this.get_active() {
+                                // get the index of the item
+                                match &selection.get_name().unwrap() as &str {
+                                    "Close this instance" => {}
+                                    "Edit instance settings" => {}
+                                    _ => {}
+                                }
+                            }
+                            this.destroy();
+                            *already_spawned_popup.borrow_mut() = false;
+                        });
+                    }
                 }
 
                 Inhibit(false)
