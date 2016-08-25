@@ -47,10 +47,10 @@ impl GtkVisualizerConfig {
 impl ConvertTo<GtkVisualizerConfig> for GtkVisualizerInstance {
     fn convert_to(&self) -> GtkVisualizerConfig {
         GtkVisualizerConfig {
-            index: (*(self.index.lock().unwrap())),
-            style: (*(self.style.lock().unwrap())).convert_to(),
-            x_pos: (*(self.x_pos.lock().unwrap())),
-            y_pos: (*(self.y_pos.lock().unwrap())),
+            index: *self.index.borrow(),
+            style: (*self.style).borrow().convert_to(),
+            x_pos: *self.x_pos.borrow(),
+            y_pos: *self.y_pos.borrow(),
         }
     }
 }

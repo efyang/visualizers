@@ -5,6 +5,8 @@ use gtk;
 use gdk::WindowTypeHint;
 use time::precise_time_ns;
 
+use std::rc::Rc;
+use std::cell::RefCell;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
 
@@ -14,6 +16,7 @@ use gtk_helpers::is_right_click;
 use message::UpdateMessage;
 use shared_data::SharedData;
 
+
 // make this changeable in program settings later on: Arc<Mutex> for each instance
 const DRAW_UPDATE_TIME: u64 = 1000_000_000; // ns or 500 ms
 
@@ -21,11 +24,11 @@ const DRAW_UPDATE_TIME: u64 = 1000_000_000; // ns or 500 ms
 // have instance have a Arc<Mutex<DrawingStyle>> and just mutate that
 pub struct GtkVisualizerInstance {
     id: usize,
-    pub index: Arc<Mutex<usize>>,
+    pub index: Rc<RefCell<usize>>,
     window: Window,
-    pub x_pos: Arc<Mutex<usize>>,
-    pub y_pos: Arc<Mutex<usize>>,
-    pub style: Arc<Mutex<DrawingStyle>>,
+    pub x_pos: Rc<RefCell<usize>>,
+    pub y_pos: Rc<RefCell<usize>>,
+    pub style: Rc<RefCell<DrawingStyle>>,
     msg_sender: Sender<UpdateMessage>,
     data_sources: Vec<SharedData>,
     last_drawn: u64,
@@ -78,10 +81,10 @@ impl GtkVisualizerInstance {
             panic!("Cannot use non-composited screen");
         }
 
-        let index = Arc::new(Mutex::new(index));
-        let x_pos = Arc::new(Mutex::new(x));
-        let y_pos = Arc::new(Mutex::new(y));
-        let style = Arc::new(Mutex::new(style));
+        let index = Rc::new(RefCell::new(index));
+        let x_pos = Rc::new(RefCell::new(x));
+        let y_pos = Rc::new(RefCell::new(y));
+        let style = Rc::new(RefCell::new(style));
         let sources = sources.to_vec();
 
         // Setup draw operations
@@ -90,12 +93,11 @@ impl GtkVisualizerInstance {
             window.connect_draw(move |window, context| {
                 {
                     // resize to the needed draw size
-                    let ref style = style.lock().unwrap();
+                    let ref style = *style.borrow();
                     let (width, height) = style.draw_area();
                     window.resize(width as i32, height as i32);
                     // get the source data
-                    let ref item = sources[index.lock().unwrap().clone()];
-                    // dunno whether to clone or not, just clone for now i guess
+                    let ref item = sources[*index.borrow()];
                     let mut unwrapped = item.lock().unwrap().clone();
                     match unwrapped {
                         Some(ref mut source) => {
@@ -107,7 +109,7 @@ impl GtkVisualizerInstance {
                     }
                 }
                 // move to a new position if any
-                window.move_(*x_pos.lock().unwrap() as i32, *y_pos.lock().unwrap() as i32);
+                window.move_(*x_pos.borrow() as i32, *y_pos.borrow() as i32);
 
                 Inhibit(false)
             });
@@ -173,7 +175,7 @@ impl GtkVisualizerInstance {
     }
 
     fn index(&self) -> usize {
-        *self.index.lock().unwrap()
+        *self.index.borrow()
     }
 
     pub fn show_all(&self) {
