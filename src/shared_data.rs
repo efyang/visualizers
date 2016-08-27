@@ -1,8 +1,12 @@
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
 use audio_input::AudioFrame;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub type SharedData = Arc<Mutex<Option<AudioFrame>>>;
+
+pub type StateHolder<T> = Rc<RefCell<T>>;
 
 #[derive(Clone)]
 pub struct ContinueState {

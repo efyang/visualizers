@@ -24,6 +24,7 @@ mod config;
 mod data_helpers;
 mod drawing;
 mod gtk_helpers;
+mod gtk_settings;
 mod icon;
 mod instance;
 mod lockfile;

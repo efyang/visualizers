@@ -14,7 +14,8 @@ use audio_input::AudioFrame;
 use drawing::*;
 use gtk_helpers::is_right_click;
 use message::UpdateMessage;
-use shared_data::SharedData;
+use shared_data::{SharedData, StateHolder};
+use gtk_settings::SettingsWindow;
 
 
 // make this changeable in program settings later on: Arc<Mutex> for each instance
@@ -24,11 +25,11 @@ const DRAW_UPDATE_TIME: u64 = 1000_000_000; // ns or 500 ms
 // have instance have a Arc<Mutex<DrawingStyle>> and just mutate that
 pub struct GtkVisualizerInstance {
     id: usize,
-    pub index: Rc<RefCell<usize>>,
+    pub index: StateHolder<usize>,
     window: Window,
-    pub x_pos: Rc<RefCell<usize>>,
-    pub y_pos: Rc<RefCell<usize>>,
-    pub style: Rc<RefCell<DrawingStyle>>,
+    pub x_pos: StateHolder<usize>,
+    pub y_pos: StateHolder<usize>,
+    pub style: StateHolder<DrawingStyle>,
     msg_sender: Sender<UpdateMessage>,
     data_sources: Vec<SharedData>,
     last_drawn: u64,
@@ -145,18 +146,25 @@ impl GtkVisualizerInstance {
 
                         // right click menu callbacks
                         let already_spawned_popup = already_spawned_popup.clone();
-                        right_click_menu.connect_hide(move |this| {
-                            if let Some(selection) = this.get_active() {
-                                // get the index of the item
-                                match &selection.get_name().unwrap() as &str {
-                                    "Close this instance" => {}
-                                    "Edit instance settings" => {}
-                                    _ => {}
+                        {
+                            clone_local!(index, x_pos, y_pos, style);
+                            right_click_menu.connect_hide(move |this| {
+                                clone_local!(index, x_pos, y_pos, style);
+                                if let Some(selection) = this.get_active() {
+                                    // get the index of the item
+                                    match &selection.get_name().unwrap() as &str {
+                                        "Close this instance" => {}
+                                        "Edit instance settings" => {
+                                            let settings = SettingsWindow::new(index, x_pos, y_pos, style);
+                                            settings.show_all();
+                                        }
+                                        _ => {}
+                                    }
                                 }
-                            }
-                            this.destroy();
-                            *already_spawned_popup.borrow_mut() = false;
-                        });
+                                this.destroy();
+                                *already_spawned_popup.borrow_mut() = false;
+                            });
+                        }
                     }
                 }
 

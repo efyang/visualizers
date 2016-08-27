@@ -103,9 +103,9 @@ impl GtkVisualizerApp {
         if !self.program_continue.get() {
             Err("Program ended".to_string())
         } else {
-            while gtk::events_pending() {
+            //while gtk::events_pending()
+            // ^ this kills the cpu
                 gtk::main_iteration();
-            }
             Ok(())
         }
     }
