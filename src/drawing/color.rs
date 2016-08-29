@@ -27,8 +27,8 @@ impl Into<GdkRGBA> for Color {
     fn into(self) -> GdkRGBA {
         GdkRGBA {
             red: self.0,
-            blue: self.1,
-            green: self.2,
+            green: self.1,
+            blue: self.2,
             alpha: self.3,
         }
     }
@@ -36,6 +36,6 @@ impl Into<GdkRGBA> for Color {
 
 impl Into<Color> for GdkRGBA {
     fn into(self) -> Color {
-        Color(self.red, self.blue, self.green, self.alpha)
+        Color(self.red, self.green, self.blue, self.alpha)
     }
 }

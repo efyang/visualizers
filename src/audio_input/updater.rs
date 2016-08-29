@@ -56,7 +56,7 @@ impl AudioUpdater {
     pub fn remove_id_from_index(&mut self, id: usize, index: usize) {
         let mut rm_audio_processor = false;
         if let Some((_, ref mut ids)) = self.audio_processor_mappings[index] {
-            for i in 0..ids.len() {
+            for i in (0..ids.len()).rev() {
                 if ids[i] == id {
                     ids.swap_remove(i);
                 }

@@ -52,8 +52,6 @@ impl GtkVisualizerApp {
         let mut instance_id = 0;
         for config in instance_configs {
             update_send.send(UpdateMessage::Add(instance_id, config.index)).unwrap();
-            // NOTE: temporary
-            update_send.send(UpdateMessage::ChangeMapping(instance_id, config.index, default_source_index)).unwrap();
             let instance = config.to_instance(instance_id, &current_data, update_send.clone());
             instance.show_all();
             instances.insert(instance_id, instance);

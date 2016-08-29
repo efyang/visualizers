@@ -4,7 +4,7 @@ use cairo::Context;
 
 use super::color::Color;
 use super::Draw;
-use data_helpers::{scale, shrink_by_averaging};
+use data_helpers::{scale, shrink_by_averaging, expand_by_clone};
 
 pub struct BarData {
     pub double_sided: bool,
@@ -53,16 +53,16 @@ impl Draw for BarData {
             scale_by_fft_max(buf);
         }
 
-        context.save();
         let (_, totalheight) = self.draw_area();
         // draw the background
         call_rgba_fn!(context, set_source_rgba, self.bg_color);
         context.paint();
 
         call_rgba_fn!(context, set_source_rgba, self.draw_color);
+        context.save();
         context.scale(1., -1.);
         context.translate(0., -totalheight);
-        context.translate(self.left_padding, self.top_padding);
+        context.translate(self.left_padding, self.bottom_padding);
         let maxbarheight;
         if self.double_sided {
             maxbarheight = (totalheight - self.top_padding - self.bottom_padding) / 2.;
@@ -73,7 +73,12 @@ impl Draw for BarData {
         let mut combined;
         if self.split_audio_channels {
             for datavec in data.iter_mut() {
-                shrink_by_averaging(datavec, self.num_bars);
+                if datavec.len() < self.num_bars {
+                    let expanded = expand_by_clone(datavec, self.num_bars);
+                    ::std::mem::replace(datavec, expanded);
+                } else if datavec.len() > self.num_bars {
+                    shrink_by_averaging(datavec, self.num_bars);
+                }
             }
             combined = Vec::with_capacity(self.num_bars * 2);
             combined.extend(data[0].iter());
@@ -89,11 +94,22 @@ impl Draw for BarData {
                 average /= data.len() as f64;
                 combined.push(average);
             }
-            shrink_by_averaging(&mut combined, self.num_bars);
+            if combined.len() < self.num_bars {
+                let expanded = expand_by_clone(&mut combined, self.num_bars);
+                ::std::mem::replace(&mut combined, expanded);
+            } else if combined.len() > self.num_bars {
+                shrink_by_averaging(&mut combined, self.num_bars);
+            }
             total_bars = self.num_bars;
         }
 
         let draw_half: Box<Fn()> = Box::new(move || {
+            {
+                let ref mut peaks = self.peak_heights.borrow_mut();
+                while total_bars > peaks.len() {
+                    peaks.push((0, 0.));
+                }
+            }
             for bar in 0..total_bars {
                 let chunks = f64::min(self.max_bar_pieces_vertical as f64,
                                       combined[bar] *
@@ -102,14 +118,13 @@ impl Draw for BarData {
                 let peak_height;
                 {
                     let ref mut peaks = self.peak_heights.borrow_mut();
+                    // breaking at peaks[bar]
                     peaks[bar].1 += 0.35;
                     let fallen = peaks[bar].0 as f64 - (0.5 * peaks[bar].1.powi(2));
-
                     if chunks as f64 > fallen {
                         peaks[bar].0 = chunks as isize;
                         peaks[bar].1 = 0.;
                     }
-
                     if fallen > 0. {
                         peak_height = fallen;
                     } else {

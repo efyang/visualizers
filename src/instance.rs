@@ -118,7 +118,8 @@ impl GtkVisualizerInstance {
         // workaround for weird double popups (BUG)
         let already_spawned_popup = Rc::new(RefCell::new(false));
         {
-            clone_local!(index, x_pos, y_pos, style, already_spawned_popup);
+            let num_sources = sources.len();
+            clone_local!(index, x_pos, y_pos, style, already_spawned_popup, update_sender);
             window.connect_button_release_event(move |window, ebutton| {
                 if is_right_click(ebutton) {
                     if !*already_spawned_popup.borrow() {
@@ -145,15 +146,15 @@ impl GtkVisualizerInstance {
                         // right click menu callbacks
                         let already_spawned_popup = already_spawned_popup.clone();
                         {
-                            clone_local!(index, x_pos, y_pos, style);
+                            clone_local!(index, x_pos, y_pos, style, update_sender);
                             right_click_menu.connect_hide(move |this| {
-                                clone_local!(index, x_pos, y_pos, style);
+                                clone_local!(index, x_pos, y_pos, style, update_sender);
                                 if let Some(selection) = this.get_active() {
                                     // get the index of the item
                                     match &selection.get_name().unwrap() as &str {
                                         "Close this instance" => {}
                                         "Edit instance settings" => {
-                                            let settings = SettingsWindow::new(index, x_pos, y_pos, style);
+                                            let settings = SettingsWindow::new(id, num_sources, index, x_pos, y_pos, style, update_sender);
                                             settings.show_all();
                                         }
                                         _ => {}
