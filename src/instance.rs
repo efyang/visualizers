@@ -12,11 +12,9 @@ use std::sync::{Arc, Mutex};
 
 use audio_input::AudioFrame;
 use drawing::*;
-use gtk_helpers::is_right_click;
+use ui::{is_right_click, SettingsWindow};
 use message::UpdateMessage;
 use shared_data::{SharedData, StateHolder};
-use gtk_settings::SettingsWindow;
-
 
 // make this changeable in program settings later on: Arc<Mutex> for each instance
 const DRAW_UPDATE_TIME: u64 = 1000_000_000; // ns or 500 ms

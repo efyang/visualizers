@@ -11,7 +11,7 @@ use audio_input::{get_sources, PaSourceInfo};
 use audio_input::{AudioProcessor, FRAMES, AudioFrame};
 use shared_data::ContinueState;
 use config::read_config;
-use icon::default_status_icon;
+use ui::default_status_icon;
 use instance::GtkVisualizerInstance;
 use message::UpdateMessage;
 

@@ -31,3 +31,33 @@ impl Draw for DrawingStyle {
         }
     }
 }
+
+macro_rules! make_unwrapper {
+    ($name:ident, $used:ident, $ignore1:ident, $ignore2:ident, $out:ty) => {
+        pub fn $name(&self) -> Option<&$out> {
+            match *self {
+                DrawingStyle::$used(ref data) => Some(data),
+                DrawingStyle::$ignore1(_) => None,
+                DrawingStyle::$ignore2(_) => None,
+            }
+        }
+    };
+    (m, $name:ident, $used:ident, $ignore1:ident, $ignore2:ident, $out:ty) => {
+        pub fn $name(&mut self) -> Option<&mut $out> {
+            match *self {
+                DrawingStyle::$used(ref mut data) => Some(data),
+                DrawingStyle::$ignore1(_) => None,
+                DrawingStyle::$ignore2(_) => None,
+            }
+        }
+    };
+}
+
+impl DrawingStyle {
+    make_unwrapper!(bars, Bars, Circle, Gradient, BarData);
+    make_unwrapper!(m, bars_mut, Bars, Circle, Gradient, BarData);
+    make_unwrapper!(circle, Circle, Bars, Gradient, CircleData);
+    make_unwrapper!(m, circle_mut, Circle, Bars, Gradient, CircleData);
+    make_unwrapper!(gradient, Gradient, Circle, Bars, GradientData);
+    make_unwrapper!(m, gradient_mut, Gradient, Circle, Bars, GradientData);
+}

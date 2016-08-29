@@ -2,7 +2,7 @@ use gtk::StatusIcon;
 use gdk_pixbuf::PixbufLoader;
 
 pub fn default_status_icon() -> Result<StatusIcon, String> {
-    let data = include_bytes!("../resources/icon.png");
+    let data = include_bytes!("../../resources/icon.png");
     let loader = PixbufLoader::new();
     if let Err(e) = loader.loader_write(data) {
         return Err(format!("{}", e));
