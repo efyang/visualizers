@@ -11,9 +11,9 @@ use serde_yaml::{from_reader, to_writer};
 use app_dirs::{get_app_dir, AppDirType};
 use app::GtkVisualizerApp;
 
-use self::traits::ConvertTo;
+pub use self::traits::ConvertTo;
 use self::drawingstyle::DrawingStyleConfig;
-use self::instance::GtkVisualizerConfig;
+pub use self::instance::GtkVisualizerConfig;
 
 const CONFIG_NAME: &'static str = "visualizers.yml";
 const CONFIG_DIR: &'static str = "visualizers";

@@ -31,12 +31,7 @@ pub struct GtkVisualizerInstance {
     msg_sender: Sender<UpdateMessage>,
     data_sources: Vec<SharedData>,
     last_drawn: u64,
-}
-
-macro_rules! clone_local {
-    ( $( $x:ident ),* ) => {
-        $(let $x = $x.clone();)*
-    }
+    instance_continue: StateHolder<bool>,
 }
 
 impl GtkVisualizerInstance {
@@ -59,6 +54,7 @@ impl GtkVisualizerInstance {
                           style: DrawingStyle,
                           update_sender: Sender<UpdateMessage>)
                           -> Self {
+        update_sender.send(UpdateMessage::Add(id, index)).unwrap();
         let window = Window::new(WindowType::Toplevel);
 
         window.set_title(&format!("Visualizers Instance {}", id));
@@ -84,6 +80,7 @@ impl GtkVisualizerInstance {
         let x_pos = Rc::new(RefCell::new(x));
         let y_pos = Rc::new(RefCell::new(y));
         let style = Rc::new(RefCell::new(style));
+        let instance_continue = Rc::new(RefCell::new(true));
         let sources = sources.to_vec();
 
         // Setup draw operations
@@ -119,12 +116,18 @@ impl GtkVisualizerInstance {
         let already_spawned_popup = Rc::new(RefCell::new(false));
         {
             let num_sources = sources.len();
-            clone_local!(index, x_pos, y_pos, style, already_spawned_popup, update_sender);
+            clone_local!(index,
+                         x_pos,
+                         y_pos,
+                         style,
+                         already_spawned_popup,
+                         update_sender,
+                         instance_continue);
             window.connect_button_release_event(move |window, ebutton| {
                 if is_right_click(ebutton) {
                     if !*already_spawned_popup.borrow() {
                         *already_spawned_popup.borrow_mut() = true;
-                        
+
                         let time = ebutton.get_time();
                         // create right click menu
                         let right_click_menu = Menu::new();
@@ -135,7 +138,7 @@ impl GtkVisualizerInstance {
                             right_click_menu.append(&item);
                         }
                         // null item workaround - to detect if no buttons clicked
-                        let null_item = gtk::MenuItem::new_with_label("");
+                        let null_item = MenuItem::new_with_label("");
                         null_item.set_name("None");
                         right_click_menu.add(&null_item);
                         right_click_menu.set_active(menu_buttons.len() as u32);
@@ -146,15 +149,24 @@ impl GtkVisualizerInstance {
                         // right click menu callbacks
                         let already_spawned_popup = already_spawned_popup.clone();
                         {
-                            clone_local!(index, x_pos, y_pos, style, update_sender);
+                            clone_local!(index, x_pos, y_pos, style, update_sender, instance_continue);
                             right_click_menu.connect_hide(move |this| {
-                                clone_local!(index, x_pos, y_pos, style, update_sender);
+                                clone_local!(index, x_pos, y_pos, style, update_sender, instance_continue);
                                 if let Some(selection) = this.get_active() {
                                     // get the index of the item
                                     match &selection.get_name().unwrap() as &str {
-                                        "Close this instance" => {}
+                                        "Close this instance" => {
+                                            *instance_continue.borrow_mut() = false;
+                                            update_sender.send(UpdateMessage::Destroy(id, *index.borrow())).unwrap();
+                                        }
                                         "Edit instance settings" => {
-                                            let settings = SettingsWindow::new(id, num_sources, index, x_pos, y_pos, style, update_sender);
+                                            let settings = SettingsWindow::new(id,
+                                                                               num_sources,
+                                                                               index,
+                                                                               x_pos,
+                                                                               y_pos,
+                                                                               style,
+                                                                               update_sender);
                                             settings.show_all();
                                         }
                                         _ => {}
@@ -170,6 +182,7 @@ impl GtkVisualizerInstance {
                 Inhibit(false)
             });
         }
+        window.show_all();
 
         GtkVisualizerInstance {
             id: id,
@@ -181,6 +194,7 @@ impl GtkVisualizerInstance {
             msg_sender: update_sender,
             data_sources: sources,
             last_drawn: precise_time_ns(),
+            instance_continue: instance_continue,
         }
     }
 
@@ -192,16 +206,18 @@ impl GtkVisualizerInstance {
         *self.index.borrow()
     }
 
-    pub fn show_all(&self) {
-        self.window.show_all();
-    }
-
-    pub fn iterate(&mut self) {
+    pub fn iterate(&mut self) -> bool {
         // add a custom timer or use gtk::timout_add?
         let time_now = precise_time_ns();
         if time_now > self.last_drawn + DRAW_UPDATE_TIME {
             self.window.queue_draw();
         }
-        // unimplemented!()
+        *self.instance_continue.borrow()
+    }
+}
+
+impl Drop for GtkVisualizerInstance {
+    fn drop(&mut self) {
+        self.window.destroy();
     }
 }

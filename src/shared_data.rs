@@ -1,8 +1,8 @@
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
 use audio_input::AudioFrame;
-use std::rc::Rc;
-use std::cell::RefCell;
+pub use std::rc::Rc;
+pub use std::cell::RefCell;
 
 pub type SharedData = Arc<Mutex<Option<AudioFrame>>>;
 

@@ -8,7 +8,7 @@ struct ConfigStructure(Vec<GtkVisualizerConfig>);
 
 impl ConvertTo<Vec<GtkVisualizerConfig>> for GtkVisualizerApp {
     fn convert_to(&self) -> Vec<GtkVisualizerConfig> {
-        self.instances.values().map(|v| v.convert_to()).collect()
+        (*self.instances.borrow()).values().map(|v| v.convert_to()).collect()
     }
 }
 

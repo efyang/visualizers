@@ -9,9 +9,9 @@ use gtk::{StatusIcon, Window, WindowType};
 use audio_input::AudioUpdater;
 use audio_input::{get_sources, PaSourceInfo};
 use audio_input::{AudioProcessor, FRAMES, AudioFrame};
-use shared_data::ContinueState;
-use config::read_config;
-use ui::default_status_icon;
+use shared_data::{ContinueState, StateHolder, Rc, RefCell};
+use config::{read_config, write_config, ConvertTo};
+use ui::{default_status_icon, set_icon_callbacks};
 use instance::GtkVisualizerInstance;
 use message::UpdateMessage;
 
@@ -19,8 +19,8 @@ use message::UpdateMessage;
 pub struct GtkVisualizerApp {
     // id needed for configs and title
     // when assigning: give current, then increment
-    current_id_n: usize,
-    pub instances: HashMap<usize, GtkVisualizerInstance>,
+    current_id_n: StateHolder<usize>,
+    pub instances: StateHolder<HashMap<usize, GtkVisualizerInstance>>,
     icon: StatusIcon,
     program_continue: ContinueState, /* whether the program whould continue, shared by app, all instances, and audio updater */
 }
@@ -51,9 +51,7 @@ impl GtkVisualizerApp {
         let instance_configs = read_config().unwrap();
         let mut instance_id = 0;
         for config in instance_configs {
-            update_send.send(UpdateMessage::Add(instance_id, config.index)).unwrap();
             let instance = config.to_instance(instance_id, &current_data, update_send.clone());
-            instance.show_all();
             instances.insert(instance_id, instance);
             instance_id += 1;
         }
@@ -64,37 +62,42 @@ impl GtkVisualizerApp {
                                                 sources,
                                                 audio_processor_mappings,
                                                 update_recv,
-                                                current_data,
+                                                current_data.clone(),
                                                 program_continue.clone());
             ::std::thread::spawn(move || {
                 // startup the audio updater
                 loop {
                     updater.iterate().unwrap_or_else(|e| {
-                        panic!("{}", e);
-                        //*program_continue.lock().unwrap() = false;
+                        //panic!("{}", e);
+                        program_continue.set(false);
                     });
                 }
             });
         }
 
-        // initialize and set icon callbacks
-        // ...
-        // ...
-        //unimplemented!()
         let icon = default_status_icon().unwrap();
-
-        GtkVisualizerApp {
-            current_id_n: instance_id,
-            instances: instances,
+        let this = GtkVisualizerApp {
+            current_id_n: Rc::new(RefCell::new(instance_id)),
+            instances: Rc::new(RefCell::new(instances)),
             icon: icon,
-            program_continue: program_continue,
-        }
+            program_continue: program_continue.clone(),
+        };
+        set_icon_callbacks(&this.icon, this.current_id_n.clone(), this.instances.clone(), current_data, update_send, default_source_index, program_continue);
+        this
     }
 
     pub fn main_iteration(&mut self) -> Result<(), String> {
         // iterate instances
-        for instance in self.instances.iter_mut().map(|(_, i)| i) {
-            instance.iterate();
+
+        let mut to_remove = Vec::new();
+        for (id, instance) in (*self.instances.borrow_mut()).iter_mut() {
+            if !instance.iterate() {
+                // instance should be removed
+                to_remove.push(id.to_owned());
+            }
+        }
+        for id in to_remove {
+            (*self.instances.borrow_mut()).remove(&id);
         }
 
         // run the actual gtk iteration
@@ -103,21 +106,27 @@ impl GtkVisualizerApp {
         } else {
             //while gtk::events_pending()
             // ^ this kills the cpu
-                gtk::main_iteration();
+            gtk::main_iteration();
             Ok(())
         }
     }
 }
 
+impl Drop for GtkVisualizerApp {
+    fn drop(&mut self) {
+        write_config(&self.instances.borrow().values().map(|i| i.convert_to()).collect::<Vec<_>>()).unwrap()
+    }
+}
+
 fn default_source_index(default_source_name: &str,
                         sources: &Vec<Option<PaSourceInfo>>)
-                        -> Option<usize> {
-    for i in 0..sources.len() {
-        if let Some(ref source_info) = sources[i] {
-            if &source_info.name == default_source_name {
-                return Some(i);
+    -> Option<usize> {
+        for i in 0..sources.len() {
+            if let Some(ref source_info) = sources[i] {
+                if &source_info.name == default_source_name {
+                    return Some(i);
+                }
             }
         }
+        None
     }
-    None
-}

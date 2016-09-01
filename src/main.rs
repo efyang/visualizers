@@ -18,8 +18,11 @@ extern crate serde;
 extern crate serde_yaml;
 extern crate time;
 
+#[macro_use]
+mod macros;
 mod app;
 mod audio_input;
+mod autostart;
 mod config;
 mod data_helpers;
 mod drawing;
@@ -34,6 +37,9 @@ use app::GtkVisualizerApp;
 fn main() {
     let mut app = GtkVisualizerApp::initialize();
     loop {
-        app.main_iteration().unwrap();
+        if let Err(e) = app.main_iteration() {
+            println!("{}", e);
+            break;
+        }
     }
 }
