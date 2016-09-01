@@ -118,6 +118,10 @@ impl AudioUpdater {
         }
 
         // set data from audio processors
+        if self.audio_processor_mappings.iter().all(|m| m.is_none()) {
+            ::std::thread::sleep(::std::time::Duration::from_millis(50));
+        }
+
         for mapping in self.audio_processor_mappings.iter_mut() {
             if let Some((ref mut processor, _)) = *mapping {
                 let data = processor.get_data_frame();

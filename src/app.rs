@@ -88,7 +88,6 @@ impl GtkVisualizerApp {
 
     pub fn main_iteration(&mut self) -> Result<(), String> {
         // iterate instances
-
         let mut to_remove = Vec::new();
         for (id, instance) in (*self.instances.borrow_mut()).iter_mut() {
             if !instance.iterate() {
