@@ -1,6 +1,7 @@
+#[macro_use]
+mod helpers;
 mod aboutpage;
 mod icon;
-mod helpers;
 mod settings;
 
 pub use self::settings::SettingsWindow;

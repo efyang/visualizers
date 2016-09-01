@@ -1,5 +1,5 @@
 #![allow(dead_code, unused_variables, unused_imports)]
-#![feature(custom_derive, plugin)]
+#![feature(custom_derive, plugin, concat_idents)]
 #![plugin(serde_macros)]
 extern crate app_dirs;
 extern crate cairo;

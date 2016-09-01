@@ -11,131 +11,27 @@ trait ToGtkSettings {
     fn to_gtk_settings(&self) -> gtk::Box;
 }
 
-macro_rules! make_bool_changer {
-    ($name:expr, $fieldname:ident, $this_struct:ident) => {
-        {
-            let (bx, check) = new_bool_changer($name, (*$this_struct.borrow()).bars().unwrap().$fieldname);
-            let bstruct = $this_struct.clone();
-            check.connect_toggled(move |btn| {
-                (*bstruct.borrow_mut()).bars_mut().unwrap().$fieldname = btn.get_active();
-            });
-            bx
-        }
-    }
-}
-
-fn new_bool_changer(name: &str, value: bool) -> (gtk::Box, gtk::CheckButton) {
-    let bx = gtk::Box::new(Orientation::Horizontal, 0);
-    let label = gtk::Label::new(Some(name));
-    label.set_halign(Align::Start);
-    label.set_margin_left(10);
-    let check = gtk::CheckButton::new();
-    check.set_active(value);
-    bx.add(&label);
-    bx.add(&check);
-    bx.set_homogeneous(true);
-    (bx, check)
-}
-
-macro_rules! make_usize_changer {
-    ($name:expr, $min:expr, $max:expr, $fieldname:ident, $this_struct:ident) => {
-        {
-            let (bx, spin) = new_usize_changer($name, (*$this_struct.borrow()).bars().unwrap().$fieldname, $min, $max);
-            let bstruct = $this_struct.clone();
-            spin.connect_value_changed(move |sb| {
-                (*bstruct.borrow_mut()).bars_mut().unwrap().$fieldname = sb.get_value_as_int() as usize;
-            });
-            bx
-        }
-    }
-}
-
-fn new_usize_changer(name: &str, value: usize, min: usize, max: usize) -> (gtk::Box, gtk::SpinButton) {
-    let bx = gtk::Box::new(Orientation::Horizontal, 0);
-    let label = gtk::Label::new(Some(name));
-    label.set_halign(Align::Start);
-    label.set_margin_left(10);
-    let check = gtk::SpinButton::new_with_range(min as f64, max as f64, 1.);
-    check.set_value(value as f64);
-    bx.add(&label);
-    bx.add(&check);
-    bx.set_homogeneous(true);
-    (bx, check)
-}
-
-macro_rules! make_f64_changer {
-    ($name:expr, $min:expr, $max:expr, $fieldname:ident, $this_struct:ident) => {
-        {
-            let (bx, spin) = new_f64_changer($name, (*$this_struct.borrow()).bars().unwrap().$fieldname, $min, $max);
-            let bstruct = $this_struct.clone();
-            spin.connect_value_changed(move |sb| {
-                (*bstruct.borrow_mut()).bars_mut().unwrap().$fieldname = sb.get_value();
-            });
-            bx
-        }
-    }
-}
-
-fn new_f64_changer(name: &str, value: f64, min: f64, max: f64) -> (gtk::Box, gtk::SpinButton) {
-    let bx = gtk::Box::new(Orientation::Horizontal, 0);
-    let label = gtk::Label::new(Some(name));
-    label.set_halign(Align::Start);
-    label.set_margin_left(10);
-    let check = gtk::SpinButton::new_with_range(min, max, 1.);
-    check.set_value(value);
-    bx.add(&label);
-    bx.add(&check);
-    bx.set_homogeneous(true);
-    (bx, check)
-}
-
-macro_rules! make_color_changer {
-    ($name:expr, $fieldname:ident, $this_struct:ident) => {
-        {
-            let (bx, colorbtn) = new_color_changer($name, (*$this_struct.borrow()).bars().unwrap().$fieldname.clone());
-            let bstruct = $this_struct.clone();
-            colorbtn.connect_color_set(move |btn| {
-                (*bstruct.borrow_mut()).bars_mut().unwrap().$fieldname = btn.get_rgba().into();
-            });
-            bx
-        }
-    }
-}
-
-fn new_color_changer(name: &str, value: Color) -> (gtk::Box, gtk::ColorButton) {
-    let bx = gtk::Box::new(Orientation::Horizontal, 0);
-    let label = gtk::Label::new(Some(name));
-    label.set_halign(Align::Start);
-    label.set_margin_left(10);
-    let colorchange = gtk::ColorButton::new_with_rgba(&value.into());
-    colorchange.set_use_alpha(true);
-    bx.add(&label);
-    bx.add(&colorchange);
-    bx.set_homogeneous(true);
-    (bx, colorchange)
-}
-
 impl ToGtkSettings for StateHolder<DrawingStyle> {
     fn to_gtk_settings(&self) -> gtk::Box {
         let sbox = gtk::Box::new(Orientation::Vertical, 5);
         sbox.set_margin_top(10);
         match *self.borrow() {
             DrawingStyle::Bars(ref bdata) => {
-                let double_sided = make_bool_changer!("Double Sided", double_sided, self);
+                let double_sided = make_bool_changer!("Double Sided", double_sided, self, bars, bars_mut);
                 // reasonable enough for now i guess
-                let num_bars = make_usize_changer!("# Bars", 1, 8000, num_bars, self);
-                let split_audio_channels = make_bool_changer!("Split Audio Channels", split_audio_channels, self);
-                let max_bar_pieces_vertical = make_usize_changer!("Maximum Pieces per Bar", 1, 8000, max_bar_pieces_vertical, self);
-                let bar_piece_width = make_f64_changer!("Bar Piece Width", 1., 8000., bar_piece_width, self);
-                let bar_piece_height = make_f64_changer!("Bar Piece Height", 1., 8000., bar_piece_height, self);
-                let bar_piece_horizontal_spacing = make_f64_changer!("Bar Piece Horizontal Spacing", 0., 8000., bar_piece_horizontal_spacing, self);
-                let bar_piece_vertical_spacing = make_f64_changer!("Bar Piece Vertical Spacing", 0., 8000., bar_piece_vertical_spacing, self);
-                let draw_color = make_color_changer!("Bar Draw Color", draw_color, self);
-                let bg_color = make_color_changer!("Background Color", bg_color, self);
-                let top_padding = make_f64_changer!("Top Padding", 1., 8000., top_padding, self);
-                let bottom_padding = make_f64_changer!("Bottom Badding", 1., 8000., bottom_padding, self);
-                let left_padding = make_f64_changer!("Left Padding", 0., 8000., left_padding, self);
-                let right_padding = make_f64_changer!("Right Padding", 0., 8000., right_padding, self);
+                let num_bars = make_usize_changer!("# Bars", 1, 8000, num_bars, self, bars, bars_mut);
+                let split_audio_channels = make_bool_changer!("Split Audio Channels", split_audio_channels, self, bars, bars_mut);
+                let max_bar_pieces_vertical = make_usize_changer!("Maximum Pieces per Bar", 1, 8000, max_bar_pieces_vertical, self, bars, bars_mut);
+                let bar_piece_width = make_f64_changer!("Bar Piece Width", 1., 8000., bar_piece_width, self, bars, bars_mut);
+                let bar_piece_height = make_f64_changer!("Bar Piece Height", 1., 8000., bar_piece_height, self, bars, bars_mut);
+                let bar_piece_horizontal_spacing = make_f64_changer!("Bar Piece Horizontal Spacing", 0., 8000., bar_piece_horizontal_spacing, self, bars, bars_mut);
+                let bar_piece_vertical_spacing = make_f64_changer!("Bar Piece Vertical Spacing", 0., 8000., bar_piece_vertical_spacing, self, bars, bars_mut);
+                let draw_color = make_color_changer!("Bar Draw Color", draw_color, self, bars, bars_mut);
+                let bg_color = make_color_changer!("Background Color", bg_color, self, bars, bars_mut);
+                let top_padding = make_f64_changer!("Top Padding", 1., 8000., top_padding, self, bars, bars_mut);
+                let bottom_padding = make_f64_changer!("Bottom Badding", 1., 8000., bottom_padding, self, bars, bars_mut);
+                let left_padding = make_f64_changer!("Left Padding", 0., 8000., left_padding, self, bars, bars_mut);
+                let right_padding = make_f64_changer!("Right Padding", 0., 8000., right_padding, self, bars, bars_mut);
                 sbox.add(&double_sided);
                 sbox.add(&num_bars);
                 sbox.add(&split_audio_channels);
