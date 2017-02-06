@@ -1,6 +1,5 @@
 #![allow(dead_code, unused_variables, unused_imports)]
-#![feature(custom_derive, plugin, concat_idents)]
-#![plugin(serde_macros)]
+#![feature(plugin, concat_idents)]
 extern crate app_dirs;
 extern crate cairo;
 extern crate dft;
@@ -15,6 +14,8 @@ extern crate libc;
 extern crate libpulse_sys;
 extern crate pa_simple;
 extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_yaml;
 extern crate time;
 

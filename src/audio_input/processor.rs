@@ -8,7 +8,7 @@ pub struct AudioProcessor {
     source_index: usize,
     channels: usize,
     rate: u32,
-    dft_plan: Plan,
+    dft_plan: Plan<f64>,
     recorder: Reader<i16>,
     audio_buffer: Vec<i16>,
     secondary_buffers: Vec<Vec<f64>>,

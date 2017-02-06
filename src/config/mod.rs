@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::io;
 
 use serde_yaml::{from_reader, to_writer};
-use app_dirs::{get_app_dir, AppDirType};
+use app_dirs::{app_root, AppDataType, AppInfo};
 use app::GtkVisualizerApp;
 
 pub use self::traits::ConvertTo;
@@ -17,11 +17,12 @@ pub use self::instance::GtkVisualizerConfig;
 
 const CONFIG_NAME: &'static str = "visualizers.yml";
 const CONFIG_DIR: &'static str = "visualizers";
+const APP_INFO: AppInfo = AppInfo { name: "visualizers", author: "Edward Yang" };
 
 lazy_static! {
     // NOTE: panic should be changed to a better alternative
     static ref CONFIG_PATH: PathBuf = {
-        match get_app_dir(AppDirType::UserConfig) {
+        match app_root(AppDataType::UserConfig, &APP_INFO) {
             Ok(p) => p.join(CONFIG_DIR).join(CONFIG_NAME),
             Err(_) => panic!("Could not get config file"),
         }
